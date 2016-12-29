@@ -39,6 +39,7 @@
             this.btnNewCat = new System.Windows.Forms.Button();
             this.lstCategories = new System.Windows.Forms.ListBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
+            this.btnOpen = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvFiles)).BeginInit();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -103,6 +104,7 @@
             this.btnDelCat.TabIndex = 10;
             this.btnDelCat.Text = "Delete";
             this.btnDelCat.UseVisualStyleBackColor = true;
+            this.btnDelCat.Click += new System.EventHandler(this.btnDelCat_Click);
             // 
             // btnRenCat
             // 
@@ -112,6 +114,7 @@
             this.btnRenCat.TabIndex = 9;
             this.btnRenCat.Text = "Rename";
             this.btnRenCat.UseVisualStyleBackColor = true;
+            this.btnRenCat.Click += new System.EventHandler(this.btnRenCat_Click);
             // 
             // btnNewCat
             // 
@@ -121,6 +124,7 @@
             this.btnNewCat.TabIndex = 8;
             this.btnNewCat.Text = "New";
             this.btnNewCat.UseVisualStyleBackColor = true;
+            this.btnNewCat.Click += new System.EventHandler(this.btnNewCat_Click);
             // 
             // lstCategories
             // 
@@ -131,12 +135,12 @@
             this.lstCategories.Size = new System.Drawing.Size(125, 199);
             this.lstCategories.Sorted = true;
             this.lstCategories.TabIndex = 7;
+            this.lstCategories.SelectedIndexChanged += new System.EventHandler(this.lstCategories_SelectedIndexChanged);
             // 
             // textBox1
             // 
             this.textBox1.BackColor = System.Drawing.SystemColors.Control;
             this.textBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox1.Enabled = false;
             this.textBox1.Location = new System.Drawing.Point(150, 217);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
@@ -144,11 +148,22 @@
             this.textBox1.TabIndex = 11;
             this.textBox1.Text = resources.GetString("textBox1.Text");
             // 
+            // btnOpen
+            // 
+            this.btnOpen.Location = new System.Drawing.Point(469, 258);
+            this.btnOpen.Name = "btnOpen";
+            this.btnOpen.Size = new System.Drawing.Size(75, 23);
+            this.btnOpen.TabIndex = 12;
+            this.btnOpen.Text = "Open Play";
+            this.btnOpen.UseVisualStyleBackColor = true;
+            this.btnOpen.Click += new System.EventHandler(this.btnOpen_Click);
+            // 
             // frmManage
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(560, 298);
+            this.ClientSize = new System.Drawing.Size(556, 293);
+            this.Controls.Add(this.btnOpen);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.dgvFiles);
@@ -177,5 +192,6 @@
         private System.Windows.Forms.Button btnNewCat;
         private System.Windows.Forms.ListBox lstCategories;
         private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Button btnOpen;
     }
 }

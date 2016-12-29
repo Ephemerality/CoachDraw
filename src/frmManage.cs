@@ -14,6 +14,7 @@ namespace CoachDraw
     public partial class frmManage : Form
     {
         private BindingList<Tuple<string, string>> categories = new BindingList<Tuple<string, string>>();
+        public string openPlay = "";
 
         public frmManage()
         {
@@ -67,15 +68,10 @@ namespace CoachDraw
             LoadPlays(((Tuple<string, string>)lstCategories.SelectedItem).Item2);
         }
 
-        private string StripInvalid(string input)
-        {
-            return Path.GetInvalidFileNameChars().Aggregate(input, (current, c) => current.Replace(c, '-'));
-        }
-
         private void btnNewCat_Click(object sender, EventArgs e)
         {
             string result = Interaction.InputBox("Enter a category name.\r\nCannot contain the follow characters:\r\n\" , < > | : * ? \\ /", "New Category");
-            result = StripInvalid(result).ToUpper();
+            result = Utils.StripInvalid(result).ToUpper();
             if (result == "") return;
             foreach (Tuple<string, string> r in lstCategories.Items)
             {
@@ -108,7 +104,7 @@ namespace CoachDraw
         {
             if (lstCategories.SelectedItem == null) return;
             string result = Interaction.InputBox("Enter a new category name.\r\nCannot contain the follow characters:\r\n\" , < > | : * ? \\ /", "Rename Category", ((Tuple<string, string>)lstCategories.SelectedItem).Item1);
-            result = StripInvalid(result).ToUpper();
+            result = Utils.StripInvalid(result).ToUpper();
             if (result == "") return;
             foreach (Tuple<string, string> r in lstCategories.Items)
             {
@@ -210,6 +206,16 @@ namespace CoachDraw
             }
             else
                 e.Cancel = true;
+        }
+
+        private void btnOpen_Click(object sender, EventArgs e)
+        {
+            if (dgvFiles.SelectedRows.Count > 0)
+            {
+                openPlay = (string)dgvFiles.SelectedRows[0].Cells[2].Value;
+                this.DialogResult = DialogResult.Yes;
+                this.Close();
+            }
         }
     }
 }

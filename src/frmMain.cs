@@ -521,10 +521,9 @@ namespace CoachDraw
             if (!checkSaved("opening a new play")) return;
             OpenFileDialog dlg = new OpenFileDialog();
             dlg.Filter = "All supported files (*.ply, *.plyx)|*.ply;*.plyx|New play files (*.plyx)|*.plyx|HockeyVision play files (*.ply)|*.ply|All files (*.*)|*.*";
+            dlg.FilterIndex = 2;
             if (dlg.ShowDialog() == DialogResult.OK)
-            {
                 openFile(dlg.FileName, true);
-            }
         }
 
         private bool checkSaved(string operation)
@@ -606,11 +605,24 @@ namespace CoachDraw
 
         private void openHVPlayToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            frmManage ld = new frmManage();
-            ld.ShowDialog();
+            using (frmManage ld = new frmManage())
+            {
+                if (ld.ShowDialog() == DialogResult.Yes && ld.openPlay != "")
+                    openFile(ld.openPlay, false);
+            }
+        }
+
+        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (frmSaveAs ld = new frmSaveAs(txtPlayName.Text))
+            {
+                if (ld.ShowDialog() == DialogResult.Yes)
+                    // do stuff
+                    return;
+            }
         }
     }
-    
+
     public class RinkSpecs
     {
         //Distances in feet
