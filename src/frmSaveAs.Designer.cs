@@ -33,7 +33,7 @@
             this.lstCategories = new System.Windows.Forms.ListBox();
             this.panel2 = new System.Windows.Forms.Panel();
             this.txtFilename = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
+            this.lblFilename = new System.Windows.Forms.Label();
             this.chkGenerate = new System.Windows.Forms.CheckBox();
             this.label2 = new System.Windows.Forms.Label();
             this.txtPlayName = new System.Windows.Forms.TextBox();
@@ -75,8 +75,9 @@
             // 
             // panel2
             // 
+            this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel2.Controls.Add(this.txtFilename);
-            this.panel2.Controls.Add(this.label1);
+            this.panel2.Controls.Add(this.lblFilename);
             this.panel2.Controls.Add(this.chkGenerate);
             this.panel2.Location = new System.Drawing.Point(150, 46);
             this.panel2.Name = "panel2";
@@ -85,29 +86,34 @@
             // 
             // txtFilename
             // 
+            this.txtFilename.Enabled = false;
             this.txtFilename.Location = new System.Drawing.Point(79, 32);
             this.txtFilename.Name = "txtFilename";
             this.txtFilename.Size = new System.Drawing.Size(100, 20);
             this.txtFilename.TabIndex = 2;
             // 
-            // label1
+            // lblFilename
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(3, 35);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(72, 13);
-            this.label1.TabIndex = 1;
-            this.label1.Text = "Play filename:";
+            this.lblFilename.AutoSize = true;
+            this.lblFilename.Enabled = false;
+            this.lblFilename.Location = new System.Drawing.Point(3, 35);
+            this.lblFilename.Name = "lblFilename";
+            this.lblFilename.Size = new System.Drawing.Size(72, 13);
+            this.lblFilename.TabIndex = 1;
+            this.lblFilename.Text = "Play filename:";
             // 
             // chkGenerate
             // 
             this.chkGenerate.AutoSize = true;
+            this.chkGenerate.Checked = true;
+            this.chkGenerate.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkGenerate.Location = new System.Drawing.Point(6, 9);
             this.chkGenerate.Name = "chkGenerate";
             this.chkGenerate.Size = new System.Drawing.Size(153, 17);
             this.chkGenerate.TabIndex = 0;
             this.chkGenerate.Text = "Use a generated filename?";
             this.chkGenerate.UseVisualStyleBackColor = true;
+            this.chkGenerate.CheckedChanged += new System.EventHandler(this.chkGenerate_CheckedChanged);
             // 
             // label2
             // 
@@ -133,6 +139,7 @@
             this.btnSave.TabIndex = 13;
             this.btnSave.Text = "Save";
             this.btnSave.UseVisualStyleBackColor = true;
+            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
             // 
             // frmSaveAs
             // 
@@ -148,6 +155,7 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "frmSaveAs";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Save As";
             this.Load += new System.EventHandler(this.frmSaveAs_Load);
             this.panel1.ResumeLayout(false);
@@ -165,7 +173,7 @@
         private System.Windows.Forms.ListBox lstCategories;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.TextBox txtFilename;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label lblFilename;
         private System.Windows.Forms.CheckBox chkGenerate;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox txtPlayName;

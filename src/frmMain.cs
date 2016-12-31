@@ -41,6 +41,7 @@ namespace CoachDraw
         string currentFile = "";
         bool saved = true;
         uint plyxVersion = 1;
+        drawObj selected = null;
 
         public frmMain()
         {
@@ -60,24 +61,30 @@ namespace CoachDraw
             PlayerNumBox.Items.Add("None");
             for (int i = 0; i < 100; i++) PlayerNumBox.Items.Add(i.ToString());
             PlayerNumBox.SelectedIndex = 0;
-
             redraw();
+            updateTitlebar();
         }
 
-        private void updateTitlebar(string text)
+        private void updateTitlebar(string text = "")
         {
-            this.Text = (saved ? "" : "*") + text + " - Coach Draw";
+            if (currentFile == "") text = "Untitled";
+            if (text == "") text = Path.GetFileName(currentFile);
+            this.Text = (saved ? "" : "*") + text + " - Coach Draw v" + Application.ProductVersion;
+            saveToolStripMenuItem.Enabled = currentFile != "";
         }
 
         void testDrawEvent(object sender, EventArgs e)
         {
-
+            MenuItem mn = (MenuItem)sender;
+            if ((int)mn.Tag == -1) return;
+            selected = objs[(int)mn.Tag];
+            redraw();
         }
 
         #region Panel Events
         private void panel1_MouseDown(object sender, MouseEventArgs e)
         {
-            if (e.Button != System.Windows.Forms.MouseButtons.Left) return;
+            if (e.Button != MouseButtons.Left) return;
             mouseDown = true;
             startPoint.X = e.X;
             startPoint.Y = e.Y;
@@ -91,6 +98,7 @@ namespace CoachDraw
 
         private void panel1_MouseUp(object sender, MouseEventArgs e)
         {
+            selected = null;
             if (e.Button == MouseButtons.Right)
             {
 
@@ -112,19 +120,18 @@ namespace CoachDraw
                 }
                 else if (hits.Count > 1)
                 {
-                    List<MenuItem> tits = new List<MenuItem>();
+                    List<MenuItem> hitsMenu = new List<MenuItem>();
                     for (int i = 0; i < hits.Count; i++)
                     {
-                        MenuItem newMn = new MenuItem(i.ToString(), buildMenu((int)objs[hits[i]].objType, (objs[hits[i]].objLine == null ? -1 : (int)objs[hits[i]].objLine.lineType),
+                        MenuItem newMn = new MenuItem(hits[i].ToString(), buildMenu((int)objs[hits[i]].objType, (objs[hits[i]].objLine == null ? -1 : (int)objs[hits[i]].objLine.lineType),
                             (objs[hits[i]].objLine == null ? -1 : (int)objs[hits[i]].objLine.endType)));
                         newMn.Tag = hits[i];
                         newMn.Select += new EventHandler(testDrawEvent);
-                        tits.Add(newMn);
+                        hitsMenu.Add(newMn);
                     }
-                    mn = new ContextMenu(tits.ToArray());
+                    mn = new ContextMenu(hitsMenu.ToArray());
                     mn.Tag = -1;
                 }
-                else return;
                 if (mn != null) mn.Show(panel1, new Point(e.X, e.Y));
             }
             else if (e.Button == MouseButtons.Left)
@@ -169,8 +176,9 @@ namespace CoachDraw
                 }
                 objs.Add(newObj);
                 saved = false;
-                redraw();
+                updateTitlebar();
             }
+            redraw();
         }
 
         private void panel1_MouseMove(object sender, MouseEventArgs e)
@@ -182,7 +190,6 @@ namespace CoachDraw
                 panel1.Invalidate();
                 panel1.Update();
             }
-            label3.Text = e.X + ", " + e.Y;
         }
 
         private void panel1_Paint(object sender, PaintEventArgs e)
@@ -215,10 +222,10 @@ namespace CoachDraw
             if (i == -1) i = (int)(((MenuItem)mn.Parent).Parent.Tag);
             switch ((int)mn.Parent.Tag)
             {
-                case (0):
+                case 0:
                     objs[i].objType = (ItemType)Enum.Parse(typeof(ItemType), mn.Text);
                     break;
-                case (1):
+                case 1:
                     if (mn.Text == "Delete Line")
                     {
                         if (MessageBox.Show("Deleting this line cannot be undone. Are you sure you want to continue?", "Delete Line", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
@@ -227,14 +234,16 @@ namespace CoachDraw
                     else
                         objs[i].objLine.lineType = (LineType)Enum.Parse(typeof(LineType), mn.Text);
                     break;
-                case (2):
+                case 2:
                     objs[i].objLine.endType = (EndType)Enum.Parse(typeof(EndType), mn.Text);
                     break;
                 default:
                     break;
             }
             saved = false;
+            selected = null;
             redraw();
+            updateTitlebar();
         }
 
         private void deleteItem(object sender, EventArgs e)
@@ -243,7 +252,9 @@ namespace CoachDraw
             int i = (int)mn.GetContextMenu().Tag;
             if (i == -1) i = (int)mn.Parent.Tag;
             objs.RemoveAt(i);
+            saved = false;
             redraw();
+            updateTitlebar();
         }
 
         private MenuItem[] buildMenu(int it, int lt, int et)
@@ -253,21 +264,21 @@ namespace CoachDraw
             List<MenuItem> endList = new List<MenuItem>();
             foreach (string itemtype in Enum.GetNames(typeof(ItemType)))
             {
-                MenuItem m = new MenuItem(itemtype, new System.EventHandler(this.clickItemList));
+                MenuItem m = new MenuItem(itemtype, new EventHandler(clickItemList));
                 if (it != -1 && Enum.GetName(typeof(ItemType), it).Equals(itemtype)) { m.Checked = true; }
                 itemList.Add(m);
             }
-            lineList.Add(new MenuItem("Delete Line", new System.EventHandler(this.clickItemList)));
+            lineList.Add(new MenuItem("Delete Line", new EventHandler(clickItemList)));
             lineList.Add(new MenuItem("-"));
             foreach (string linetype in Enum.GetNames(typeof(LineType)))
             {
-                MenuItem m = new MenuItem(linetype, new System.EventHandler(this.clickItemList));
+                MenuItem m = new MenuItem(linetype, new EventHandler(clickItemList));
                 if (lt != -1 && !m.Checked && Enum.GetName(typeof(LineType), lt).Equals(linetype)) { m.Checked = true; }
                 lineList.Add(m);
             }
             foreach (string endtype in Enum.GetNames(typeof(EndType)))
             {
-                MenuItem m = new MenuItem(endtype, new System.EventHandler(this.clickItemList));
+                MenuItem m = new MenuItem(endtype, new EventHandler(clickItemList));
                 if (et != -1 && !m.Checked && Enum.GetName(typeof(EndType), et).Equals(endtype)) { m.Checked = true; }
                 endList.Add(m);
             }
@@ -281,14 +292,14 @@ namespace CoachDraw
             mn[2].Tag = 2;
             if (et == -1) mn[2].Enabled = false;
             mn[3] = new MenuItem("-");
-            mn[4] = new MenuItem("Delete", new System.EventHandler(this.deleteItem));
+            mn[4] = new MenuItem("Delete", new EventHandler(deleteItem));
             return mn;
         }
 
         private void redraw()
         {
             snapshot.Dispose();
-            snapshot = new Bitmap(panel1.ClientRectangle.Width, this.ClientRectangle.Height);
+            snapshot = new Bitmap(panel1.ClientRectangle.Width, ClientRectangle.Height);
             using (Graphics g = Graphics.FromImage(snapshot))
             {
                 g.SmoothingMode = SmoothingMode.HighQuality;
@@ -296,7 +307,7 @@ namespace CoachDraw
                 g.SmoothingMode = SmoothingMode.None;
                 foreach (drawObj o in objs)
                 {
-                    o.draw(g, false); //(selected == null ? false : selected.Equals(o)));
+                    o.draw(g, selected == null ? false : selected.Equals(o));
                 }
             }
             panel1.Invalidate();
@@ -315,8 +326,8 @@ namespace CoachDraw
                 g.DrawLine(bluePen, (rinkWidth / 2) - curSpecs.BlueLineFromCenter, 0, (rinkWidth / 2) - curSpecs.BlueLineFromCenter, rinkHeight); //Left blue line
                 g.DrawLine(bluePen, (rinkWidth / 2) + curSpecs.BlueLineFromCenter, 0, (rinkWidth / 2) + curSpecs.BlueLineFromCenter, rinkHeight); //Right blue line
                 Pen centerPen = new Pen(Color.Red, 5);
-                centerPen.DashCap = System.Drawing.Drawing2D.DashCap.Round;
-                centerPen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
+                centerPen.DashCap = DashCap.Round;
+                centerPen.DashStyle = DashStyle.Dash;
                 centerPen.DashOffset = 1;
                 g.DrawLine(centerPen, (rinkWidth / 2), 0, (rinkWidth / 2), rinkHeight); //Centerline
                 centerPen.Dispose();
@@ -476,6 +487,7 @@ namespace CoachDraw
             if (!checkSaved("starting a new play")) return;
             txtPlayName.Text = "";
             txtPlayDesc.Text = "";
+            currentFile = "";
             saved = true;
             objs.Clear();
             redraw();
@@ -493,18 +505,17 @@ namespace CoachDraw
             objs.Clear();
             redraw();
             PlayInfo result = null;
-            if (path.EndsWith(".ply") || path.EndsWith(".PLY"))
+            if (path.ToUpper().EndsWith(".PLY"))
                 result = Plays.LoadPLYFile(path, ref objs);
-            else if (path.EndsWith(".plyx") || path.EndsWith(".PLYX"))
+            else if (path.ToUpper().EndsWith(".PLYX"))
             {
                 result = Plays.LoadPLYXFile(path, ref objs);
                 currentFile = path;
                 saved = true;
             }
-            else Debugger.Break();
             if (result == null)
             {
-
+                MessageBox.Show("Something weird happened...");
             }
             else
             {
@@ -546,25 +557,7 @@ namespace CoachDraw
                 if (Plays.savePLYXFile(currentFile, objs, txtPlayName.Text, txtPlayDesc.Text, plyxVersion))
                 {
                     saved = true;
-                    updateTitlebar(Path.GetFileName(currentFile));
-                }
-                return;
-            }
-            else
-            {
-                SaveFileDialog dlg = new SaveFileDialog();
-                dlg.Filter = "New play files (*.plyx)|*.plyx";
-                if (dlg.ShowDialog() == DialogResult.OK)
-                {
-                    if (Plays.savePLYXFile(dlg.FileName, objs, txtPlayName.Text, txtPlayDesc.Text, plyxVersion))
-                    {
-                        saved = true;
-                        currentFile = dlg.FileName;
-                        addRecentFile(dlg.FileName);
-                        updateTitlebar(Path.GetFileName(currentFile));
-                    }
-                    else
-                        Debugger.Break();
+                    updateTitlebar();
                 }
             }
         }
@@ -580,12 +573,7 @@ namespace CoachDraw
             if (!checkSaved("exiting")) e.Cancel = true;
         }
         #endregion
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            redraw();
-        }
-
+        
         private void printToolStripMenuItem_Click(object sender, EventArgs e)
         {
             PrintDocument pd = new PrintDocument();
@@ -616,9 +604,14 @@ namespace CoachDraw
         {
             using (frmSaveAs ld = new frmSaveAs(txtPlayName.Text))
             {
-                if (ld.ShowDialog() == DialogResult.Yes)
-                    // do stuff
-                    return;
+                if (ld.ShowDialog() == DialogResult.Yes && Plays.savePLYXFile(ld.fileName, objs, ld.playName, txtPlayDesc.Text, plyxVersion))
+                {
+                    txtPlayName.Text = ld.playName;
+                    saved = true;
+                    currentFile = ld.fileName;
+                    addRecentFile(ld.fileName);
+                    updateTitlebar();
+                }
             }
         }
     }

@@ -26,9 +26,10 @@ namespace CoachDraw
         {
             if (Properties.Settings.Default.playDir == "")
             {
-                if (!Directory.Exists(Environment.CurrentDirectory + @"\PLAYS"))
-                    Directory.CreateDirectory(Environment.CurrentDirectory + @"\PLAYS");
-                Properties.Settings.Default.playDir = Environment.CurrentDirectory + @"\PLAYS";
+                string playPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "CoachDraw");
+                if (!Directory.Exists(playPath))
+                    Directory.CreateDirectory(playPath);
+                Properties.Settings.Default.playDir = playPath;
             }
             lstCategories.DataSource = categories;
             lstCategories.DisplayMember = "Item1";
@@ -47,7 +48,8 @@ namespace CoachDraw
                 categories.Add(new Tuple<string, string>(Path.GetFileName(category), category));
             }
             lstCategories.SelectedIndexChanged += lstCategories_SelectedIndexChanged;
-            LoadPlays(categories[0].Item2);
+            if (categories.Count > 0)
+                LoadPlays(categories[0].Item2);
         }
 
         private void LoadPlays(string dir)
@@ -213,8 +215,8 @@ namespace CoachDraw
             if (dgvFiles.SelectedRows.Count > 0)
             {
                 openPlay = (string)dgvFiles.SelectedRows[0].Cells[2].Value;
-                this.DialogResult = DialogResult.Yes;
-                this.Close();
+                DialogResult = DialogResult.Yes;
+                Close();
             }
         }
     }
