@@ -19,10 +19,9 @@ namespace CoachDraw
         public frmManage()
         {
             InitializeComponent();
-            dgvFiles.CellValueChanged += dgvFiles_CellValueChanged;
         }
 
-        private void frmLoadPLY_Load(object sender, EventArgs e)
+        private void frmManage_Load(object sender, EventArgs e)
         {
             if (Properties.Settings.Default.playDir == "")
             {
@@ -30,6 +29,7 @@ namespace CoachDraw
                 if (!Directory.Exists(playPath))
                     Directory.CreateDirectory(playPath);
                 Properties.Settings.Default.playDir = playPath;
+                Properties.Settings.Default.Save();
             }
             lstCategories.DataSource = categories;
             lstCategories.DisplayMember = "Item1";
@@ -212,12 +212,30 @@ namespace CoachDraw
 
         private void btnOpen_Click(object sender, EventArgs e)
         {
+            openSelected();
+        }
+
+        private void dgvFiles_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            openSelected();
+        }
+
+        private void openSelected()
+        {
             if (dgvFiles.SelectedRows.Count > 0)
             {
                 openPlay = (string)dgvFiles.SelectedRows[0].Cells[2].Value;
                 DialogResult = DialogResult.Yes;
                 Close();
             }
+        }
+
+        private void dgvFiles_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyData == Keys.F2)
+                dgvFiles.BeginEdit(true);
+            else if (e.KeyData == Keys.Enter)
+                openSelected();
         }
     }
 }

@@ -54,14 +54,16 @@
             this.Filename,
             this.PlayName,
             this.FullPath});
-            this.dgvFiles.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnF2;
+            this.dgvFiles.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
             this.dgvFiles.Location = new System.Drawing.Point(150, 4);
             this.dgvFiles.Name = "dgvFiles";
             this.dgvFiles.RowHeadersVisible = false;
             this.dgvFiles.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgvFiles.Size = new System.Drawing.Size(400, 207);
             this.dgvFiles.TabIndex = 1;
+            this.dgvFiles.CellContentDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvFiles_CellContentDoubleClick);
             this.dgvFiles.UserDeletingRow += new System.Windows.Forms.DataGridViewRowCancelEventHandler(this.dgvFiles_UserDeletingRow);
+            this.dgvFiles.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dgvFiles_KeyDown);
             // 
             // Filename
             // 
@@ -160,6 +162,7 @@
             // 
             // frmManage
             // 
+            this.AcceptButton = this.btnOpen;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(556, 293);
@@ -173,7 +176,7 @@
             this.Name = "frmManage";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Play Manager";
-            this.Load += new System.EventHandler(this.frmLoadPLY_Load);
+            this.Load += new System.EventHandler(this.frmManage_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgvFiles)).EndInit();
             this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
