@@ -168,7 +168,7 @@ namespace CoachDraw
                 points = Smoothing.BasicReduction(points, 5);
                 smoothed = true;
             }
-            if (getAggregateLength(0, points.Count - 1) == 0) return false; // Line doesn't actually seem to go anywhere. return false so that sucker can be removed!
+            if (getAggregateLength(0, points.Count - 1) < 5) return false; // Line doesn't actually seem to go anywhere. return false so that sucker can be removed!
             setHitBox();
             switch (lineType)
             {
