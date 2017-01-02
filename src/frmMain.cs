@@ -73,11 +73,17 @@ namespace CoachDraw
             saveToolStripMenuItem.Enabled = currentFile != "";
         }
 
-        void testDrawEvent(object sender, EventArgs e)
+        void selectObj(object sender, EventArgs e)
         {
-            MenuItem mn = (MenuItem)sender;
+            ToolStripMenuItem mn = (ToolStripMenuItem)sender;
             if ((int)mn.Tag == -1) return;
             selected = objs[(int)mn.Tag];
+            redraw();
+        }
+
+        void deselectObj(object sender, ToolStripDropDownClosedEventArgs e)
+        {
+            selected = null;
             redraw();
         }
 
@@ -111,28 +117,32 @@ namespace CoachDraw
                         hits.Add(i);
                     }
                 }
-                ContextMenu mn = null;
+                ContextMenuStrip mn = new ContextMenuStrip();
+                mn.Closed += new ToolStripDropDownClosedEventHandler(deselectObj);
                 if (hits.Count == 1)
                 {
-                    mn = new ContextMenu(buildMenu((int)objs[hits[0]].objType, (objs[hits[0]].objLine == null ? -1 : (int)objs[hits[0]].objLine.lineType),
-                        (objs[hits[0]].objLine == null ? -1 : (int)objs[hits[0]].objLine.endType)));
+                    mn.Items.AddRange(buildMenu((int)objs[hits[0]].objType, (objs[hits[0]].objLine == null ? -1 : (int)objs[hits[0]].objLine.lineType),
+                            (objs[hits[0]].objLine == null ? -1 : (int)objs[hits[0]].objLine.endType)));
                     mn.Tag = hits[0];
+                    selected = objs[hits[0]];
+                    redraw();
                 }
                 else if (hits.Count > 1)
                 {
-                    List<MenuItem> hitsMenu = new List<MenuItem>();
+                    List<ToolStripMenuItem> hitsMenu = new List<ToolStripMenuItem>();
                     for (int i = 0; i < hits.Count; i++)
                     {
-                        MenuItem newMn = new MenuItem(hits[i].ToString(), buildMenu((int)objs[hits[i]].objType, (objs[hits[i]].objLine == null ? -1 : (int)objs[hits[i]].objLine.lineType),
+                        ToolStripMenuItem newMn = new ToolStripMenuItem(hits[i].ToString());
+                        newMn.DropDownItems.AddRange(buildMenu((int)objs[hits[i]].objType, (objs[hits[i]].objLine == null ? -1 : (int)objs[hits[i]].objLine.lineType),
                             (objs[hits[i]].objLine == null ? -1 : (int)objs[hits[i]].objLine.endType)));
                         newMn.Tag = hits[i];
-                        newMn.Select += new EventHandler(testDrawEvent);
+                        newMn.MouseHover += new EventHandler(selectObj);
                         hitsMenu.Add(newMn);
                     }
-                    mn = new ContextMenu(hitsMenu.ToArray());
+                    mn.Items.AddRange(hitsMenu.ToArray());
                     mn.Tag = -1;
                 }
-                if (mn != null) mn.Show(panel1, new Point(e.X, e.Y));
+                if (mn.Items.Count > 0) mn.Show(panel1, new Point(e.X, e.Y));
             }
             else if (e.Button == MouseButtons.Left)
             {
@@ -217,10 +227,20 @@ namespace CoachDraw
 
         private void clickItemList(object sender, EventArgs e)
         {
-            MenuItem mn = (MenuItem)sender;
-            int i = (int)mn.GetContextMenu().Tag; //Index of the object or -1
-            if (i == -1) i = (int)(((MenuItem)mn.Parent).Parent.Tag);
-            switch ((int)mn.Parent.Tag)
+            ToolStripMenuItem mn = (ToolStripMenuItem)sender;
+            int i = -1;
+            ToolStripItem next = mn.OwnerItem;
+            while (next != null)
+            {
+                if (next.Owner.GetType() == typeof(ContextMenuStrip))
+                {
+                    if ((int)next.Owner.Tag == -1) i = (int)next.Tag;
+                    else i = (int)next.Owner.Tag;
+                    break;
+                }
+                next = next.OwnerItem;
+            }
+            switch ((int)mn.OwnerItem.Tag)
             {
                 case 0:
                     objs[i].objType = (ItemType)Enum.Parse(typeof(ItemType), mn.Text);
@@ -248,51 +268,54 @@ namespace CoachDraw
 
         private void deleteItem(object sender, EventArgs e)
         {
-            MenuItem mn = (MenuItem)sender;
-            int i = (int)mn.GetContextMenu().Tag;
-            if (i == -1) i = (int)mn.Parent.Tag;
+            ToolStripMenuItem mn = (ToolStripMenuItem)sender;
+            int i;
+            if (mn.Owner.GetType() == typeof(ContextMenuStrip))
+               i = (int)mn.Owner.Tag;
+            else
+               i = (int)mn.OwnerItem.Tag;
             objs.RemoveAt(i);
             saved = false;
             redraw();
             updateTitlebar();
         }
 
-        private MenuItem[] buildMenu(int it, int lt, int et)
+        private ToolStripItem[] buildMenu(int it, int lt, int et)
         {
-            List<MenuItem> itemList = new List<MenuItem>();
-            List<MenuItem> lineList = new List<MenuItem>();
-            List<MenuItem> endList = new List<MenuItem>();
+            List<ToolStripItem> itemList = new List<ToolStripItem>();
+            List<ToolStripItem> lineList = new List<ToolStripItem>();
+            List<ToolStripItem> endList = new List<ToolStripItem>();
             foreach (string itemtype in Enum.GetNames(typeof(ItemType)))
             {
-                MenuItem m = new MenuItem(itemtype, new EventHandler(clickItemList));
+                ToolStripMenuItem m = new ToolStripMenuItem(itemtype, null, new EventHandler(clickItemList));
                 if (it != -1 && Enum.GetName(typeof(ItemType), it).Equals(itemtype)) { m.Checked = true; }
                 itemList.Add(m);
             }
-            lineList.Add(new MenuItem("Delete Line", new EventHandler(clickItemList)));
-            lineList.Add(new MenuItem("-"));
+            lineList.Add(new ToolStripMenuItem("Delete Line", null, new EventHandler(clickItemList)));
+            lineList.Add(new ToolStripSeparator());
             foreach (string linetype in Enum.GetNames(typeof(LineType)))
             {
-                MenuItem m = new MenuItem(linetype, new EventHandler(clickItemList));
+                ToolStripMenuItem m = new ToolStripMenuItem(linetype, null, new EventHandler(clickItemList));
                 if (lt != -1 && !m.Checked && Enum.GetName(typeof(LineType), lt).Equals(linetype)) { m.Checked = true; }
                 lineList.Add(m);
             }
             foreach (string endtype in Enum.GetNames(typeof(EndType)))
             {
-                MenuItem m = new MenuItem(endtype, new EventHandler(clickItemList));
+                ToolStripMenuItem m = new ToolStripMenuItem(endtype, null, new EventHandler(clickItemList));
                 if (et != -1 && !m.Checked && Enum.GetName(typeof(EndType), et).Equals(endtype)) { m.Checked = true; }
                 endList.Add(m);
             }
-            MenuItem[] mn = new MenuItem[5];
-            mn[0] = new MenuItem("Item Type", itemList.ToArray());
+            ToolStripItem[] mn = new ToolStripItem[5];
+            mn[0] = new ToolStripMenuItem("Item Type", null, itemList.ToArray());
             mn[0].Tag = 0;
-            mn[1] = new MenuItem("Line Type", lineList.ToArray());
+            mn[1] = new ToolStripMenuItem("Line Type", null, lineList.ToArray());
             mn[1].Tag = 1;
             if (lt == -1) mn[1].Enabled = false;
-            mn[2] = new MenuItem("End Type", endList.ToArray());
+            mn[2] = new ToolStripMenuItem("End Type", null, endList.ToArray());
             mn[2].Tag = 2;
             if (et == -1) mn[2].Enabled = false;
-            mn[3] = new MenuItem("-");
-            mn[4] = new MenuItem("Delete", new EventHandler(deleteItem));
+            mn[3] = new ToolStripSeparator();
+            mn[4] = new ToolStripMenuItem("Delete", null, new EventHandler(deleteItem));
             return mn;
         }
 
