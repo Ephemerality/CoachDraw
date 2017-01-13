@@ -30,8 +30,8 @@
     <MinimumRequiredVersion>1.0.0.0</MinimumRequiredVersion>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>3</ApplicationRevision>
-    <ApplicationVersion>1.0.0.3</ApplicationVersion>
+    <ApplicationRevision>4</ApplicationRevision>
+    <ApplicationVersion>1.0.0.4</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -112,6 +112,12 @@
     <Compile Include="src\frmMain.Designer.cs">
       <DependentUpon>frmMain.cs</DependentUpon>
     </Compile>
+    <Compile Include="src\frmMultiPrint.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="src\frmMultiPrint.Designer.cs">
+      <DependentUpon>frmMultiPrint.cs</DependentUpon>
+    </Compile>
     <Compile Include="src\frmSaveAs.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -139,6 +145,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="src\frmMultiPrint.resx">
+      <DependentUpon>frmMultiPrint.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="src\frmSaveAs.resx">
       <DependentUpon>frmSaveAs.cs</DependentUpon>
     </EmbeddedResource>

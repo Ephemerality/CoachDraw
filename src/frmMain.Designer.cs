@@ -54,6 +54,8 @@
             this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.printToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.printCurrent = new System.Windows.Forms.ToolStripMenuItem();
+            this.printMultiple = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.recentFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
@@ -62,7 +64,9 @@
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.txtPlayDesc = new System.Windows.Forms.TextBox();
+            this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new CoachDraw.BufferedPanel();
+            this.selectPrint = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -312,11 +316,28 @@
             // 
             // printToolStripMenuItem
             // 
+            this.printToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.printCurrent,
+            this.printMultiple});
             this.printToolStripMenuItem.Name = "printToolStripMenuItem";
-            this.printToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.P)));
             this.printToolStripMenuItem.Size = new System.Drawing.Size(235, 22);
-            this.printToolStripMenuItem.Text = "Print...";
-            this.printToolStripMenuItem.Click += new System.EventHandler(this.printToolStripMenuItem_Click);
+            this.printToolStripMenuItem.Text = "Print";
+            // 
+            // printCurrent
+            // 
+            this.printCurrent.Name = "printCurrent";
+            this.printCurrent.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.P)));
+            this.printCurrent.Size = new System.Drawing.Size(230, 22);
+            this.printCurrent.Text = "Print current play...";
+            this.printCurrent.Click += new System.EventHandler(this.printCurrent_Click);
+            // 
+            // printMultiple
+            // 
+            this.printMultiple.Name = "printMultiple";
+            this.printMultiple.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.M)));
+            this.printMultiple.Size = new System.Drawing.Size(230, 22);
+            this.printMultiple.Text = "Print multiple plays...";
+            this.printMultiple.Click += new System.EventHandler(this.printMultiple_Click);
             // 
             // toolStripSeparator3
             // 
@@ -377,6 +398,13 @@
             this.txtPlayDesc.Size = new System.Drawing.Size(289, 111);
             this.txtPlayDesc.TabIndex = 6;
             // 
+            // toolStripMenuItem5
+            // 
+            this.toolStripMenuItem5.Enabled = false;
+            this.toolStripMenuItem5.Name = "toolStripMenuItem5";
+            this.toolStripMenuItem5.Size = new System.Drawing.Size(22, 20);
+            this.toolStripMenuItem5.Text = "|";
+            // 
             // panel1
             // 
             this.panel1.Location = new System.Drawing.Point(5, 52);
@@ -387,6 +415,12 @@
             this.panel1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseDown);
             this.panel1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseMove);
             this.panel1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseUp);
+            // 
+            // selectPrint
+            // 
+            this.selectPrint.Name = "selectPrint";
+            this.selectPrint.Size = new System.Drawing.Size(125, 20);
+            this.selectPrint.Text = "toolStripMenuItem4";
             // 
             // frmMain
             // 
@@ -454,6 +488,11 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripMenuItem managePlaysToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveAsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem printCurrent;
+        private System.Windows.Forms.ToolStripMenuItem printMultiple;
+        private System.Windows.Forms.ToolStripMenuItem selectDraw;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem5;
+        private System.Windows.Forms.ToolStripMenuItem selectPrint;
     }
 }
 

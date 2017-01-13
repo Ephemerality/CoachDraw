@@ -132,7 +132,7 @@
             // 
             this.lstCategories.FormattingEnabled = true;
             this.lstCategories.HorizontalScrollbar = true;
-            this.lstCategories.Location = new System.Drawing.Point(7, 7);
+            this.lstCategories.Location = new System.Drawing.Point(7, 5);
             this.lstCategories.Name = "lstCategories";
             this.lstCategories.Size = new System.Drawing.Size(125, 199);
             this.lstCategories.Sorted = true;

@@ -42,6 +42,8 @@ namespace CoachDraw
         bool saved = true;
         uint plyxVersion = 1;
         drawObj selected = null;
+        string lastSelectedMultiPrint = "";
+        List<string> lastSetMultiPrint = new List<string>() { "", "", "", "" };
 
         public frmMain()
         {
@@ -322,7 +324,7 @@ namespace CoachDraw
         private void redraw()
         {
             snapshot.Dispose();
-            snapshot = new Bitmap(panel1.ClientRectangle.Width, ClientRectangle.Height);
+            snapshot = new Bitmap(panel1.ClientRectangle.Width, panel1.ClientRectangle.Height);
             using (Graphics g = Graphics.FromImage(snapshot))
             {
                 g.SmoothingMode = SmoothingMode.HighQuality;
@@ -597,23 +599,6 @@ namespace CoachDraw
         }
         #endregion
         
-        private void printToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            PrintDocument pd = new PrintDocument();
-            pd.DefaultPageSettings.Landscape = true;
-            pd.PrintPage += (object printSender, PrintPageEventArgs pe) =>
-                {
-                    pe.Graphics.DrawImageUnscaled(snapshot, new Point(0, 0));
-                };
-            PrintDialog dialog = new PrintDialog();
-            dialog.Document = pd;
-            if (dialog.ShowDialog() == DialogResult.OK)
-            {
-                pd.PrinterSettings = dialog.PrinterSettings;
-                pd.Print();
-            }
-        }
-
         private void openHVPlayToolStripMenuItem_Click(object sender, EventArgs e)
         {
             using (frmManage ld = new frmManage())
@@ -635,6 +620,121 @@ namespace CoachDraw
                     addRecentFile(ld.fileName);
                     updateTitlebar();
                 }
+            }
+        }
+
+        private Font ShrinkFont(Graphics g, String text, Font font, Size proposedSize)
+        {
+            while (font.Size > 0)
+            {
+                SizeF size = g.MeasureString(text, font);
+                if (size.Height <= proposedSize.Height && size.Width <= proposedSize.Width)
+                    return font;
+                
+                Font oldFont = font;
+                font = new Font(font.Name, font.Size * 0.9f, font.Style);
+                oldFont.Dispose();
+            }
+            // Totally impossible to create a font small enough, return null and probably crash for now
+            return null;
+        }
+
+        private void printCurrent_Click(object sender, EventArgs e)
+        {
+            PrintDocument pd = new PrintDocument();
+            pd.DefaultPageSettings.Landscape = true;
+            pd.PrintPage += (object printSender, PrintPageEventArgs pe) =>
+            {
+                float posy = 50;
+                Font nameFont = new Font("Helvetica", 14.0f, FontStyle.Bold);
+                SizeF nameSize = pe.Graphics.MeasureString(txtPlayName.Text, nameFont);
+                pe.Graphics.DrawString(txtPlayName.Text, nameFont, new SolidBrush(Color.Black), new RectangleF(50.0f, posy, 900.0f, nameSize.Height), new StringFormat() { Alignment = StringAlignment.Center });
+                posy += nameSize.Height;
+                pe.Graphics.DrawImage(snapshot, new Rectangle(50, (int)posy, pe.PageSettings.PaperSize.Height - 100, Convert.ToInt32(snapshot.Height * ((pe.PageSettings.PaperSize.Height - 100.0) / snapshot.Width))));
+                posy += snapshot.Height;
+                Font descFont = ShrinkFont(pe.Graphics, txtPlayDesc.Text, new Font("Helvetica", 10.0f), new Size(900, 750 - (int)posy));
+                SizeF descSize = pe.Graphics.MeasureString(txtPlayDesc.Text, descFont);
+                pe.Graphics.DrawString(txtPlayDesc.Text, descFont, new SolidBrush(Color.Black), new RectangleF(50.0f, posy, 900.0f, 750.0f - posy));
+                pe.Graphics.DrawString("CoachDraw © 2017", new Font("Helvetica", 5.0f), new SolidBrush(Color.Black), 50, 825.0f);
+            };
+            PrintDialog dialog = new PrintDialog();
+            dialog.Document = pd;
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                PrintPreviewDialog pp = new PrintPreviewDialog();
+                pp.Document = pd;
+                pp.ShowDialog();
+                //pd.PrinterSettings = dialog.PrinterSettings;
+                //pd.Print();
+            }
+        }
+
+        private void printMultiple_Click(object sender, EventArgs e)
+        {
+            using (frmMultiPrint mp = new frmMultiPrint(currentFile, lastSelectedMultiPrint, lastSetMultiPrint))
+            {
+                if (mp.ShowDialog() == DialogResult.Yes)
+                {
+                    PrintMultiplePlays(mp.plays);
+                }
+                lastSelectedMultiPrint = mp.lastSelected;
+                lastSetMultiPrint = mp.plays;
+            }
+        }
+
+        private void PrintMultiplePlays(List<string> plays)
+        {
+            PrintDocument pd = new PrintDocument();
+            pd.PrintPage += (object printSender, PrintPageEventArgs pe) =>
+            {
+                float posy = 50;
+                foreach (string play in plays)
+                {
+                    if (play == "")
+                    {
+                        posy += 250.0f;
+                        continue;
+                    }
+                    List<drawObj> tempObjs = new List<drawObj>();
+                    PlayInfo result = Plays.LoadPLYXFile(play, ref tempObjs);
+                    Bitmap rink = new Bitmap(1000, 500);
+                    using (Graphics g = Graphics.FromImage(rink))
+                    {
+                        g.SmoothingMode = SmoothingMode.HighQuality;
+                        drawRink(g);
+                        g.SmoothingMode = SmoothingMode.None;
+                        foreach (drawObj o in tempObjs)
+                        {
+                            o.draw(g, false);
+                        }
+                    }
+                    pe.Graphics.DrawLine(new Pen(Color.Black, 1.0f), 0.0f, posy, 1100.0f, posy);
+                    posy += 5.0f;
+                    int newWidth = (int)((240.0 / rink.Height) * rink.Width);
+                    pe.Graphics.DrawImage(rink, new Rectangle(50, (int)posy, newWidth, 240));
+                    Font nameFont = ShrinkFont(pe.Graphics, result.Name, new Font("Helvetica", 11.0f, FontStyle.Bold), new Size(750 - newWidth - 10, 100));
+                    SizeF nameSize = pe.Graphics.MeasureString(result.Name, nameFont);
+                    pe.Graphics.DrawString(result.Name, nameFont, new SolidBrush(Color.Black), 50.0f + newWidth + 10.0f, posy);
+                    Font descFont = ShrinkFont(pe.Graphics, result.Desc, new Font("Helvetica", 8.0f), new Size(750 - newWidth - 10, 240 - (int)nameSize.Height - 5));
+                    pe.Graphics.DrawString(result.Desc, descFont, new SolidBrush(Color.Black), 50.0f + newWidth + 10.0f, posy + nameSize.Height + 5.0f);
+                    posy += 245.0f;
+                    pe.Graphics.DrawLine(new Pen(Color.Black, 1.0f), 0.0f, posy, 1100.0f, posy);
+                    rink.Dispose();
+                }
+                posy += 25.0f;
+                pe.Graphics.DrawString("CoachDraw © 2017", new Font("Helvetica", 5.0f), new SolidBrush(Color.Black), 50, posy);
+            };
+            PrintDialog dialog = new PrintDialog();
+            dialog.Document = pd;
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                PrintPreviewDialog pp = new PrintPreviewDialog();
+                pp.Document = pd;
+                pp.Height = this.Height;
+                pp.Width = this.Width;
+                pp.ShowDialog();
+                //pd.PrinterSettings = dialog.PrinterSettings;
+                //pd.Print();
             }
         }
     }
