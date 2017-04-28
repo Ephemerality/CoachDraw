@@ -265,7 +265,7 @@
             this.Controls.Add(this.panel1);
             this.Name = "frmMultiPrint";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "frmMultiPrint";
+            this.Text = "Multiprint";
             this.panel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvFiles)).EndInit();
             this.panel2.ResumeLayout(false);
