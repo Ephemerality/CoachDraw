@@ -170,6 +170,17 @@ namespace CoachDraw
             }
             if (getAggregateLength(0, points.Count - 1) < 5) return false; // Line doesn't actually seem to go anywhere. return false so that sucker can be removed!
             setHitBox();
+            if (endType == EndType.Arrow || endType == EndType.WideArrow)
+            {
+                GraphicsPath arrow_path = new GraphicsPath();
+                int neww = endType == EndType.WideArrow ? 14 : 7;
+                double newx = neww * Math.Cos(Math.PI / 3);
+                double newy = neww * Math.Sin(Math.PI / 3);
+                arrow_path.AddLine(0, 0, (float)newx * -1, (float)newy * -1);
+                arrow_path.AddLine(0, 0, (float)newx, (float)newy * -1);
+                CustomLineCap arrow_cap = new CustomLineCap(null, arrow_path);
+                myPen.CustomEndCap = arrow_cap;
+            }
             switch (lineType)
             {
                 case (LineType.Forward):
@@ -355,21 +366,14 @@ namespace CoachDraw
                     Debugger.Break();
                     break;
             }
+            // Reset end cap
+            myPen.CustomEndCap = new CustomLineCap(null, new GraphicsPath());
 
             switch (endType)
             {
                 case (0):
-                    break;
-                case (EndType.WideArrow):
                 case (EndType.Arrow):
-                    Point origin = points[points.Count - 1];
-                    Point first = (points.Count > 5 ? points[points.Count - 5] : points[0]);
-                    int r = (endType == EndType.WideArrow ? 28 : 15);
-                    double angle = Math.Atan2(first.Y - origin.Y, first.X - origin.X);
-                    angle += Math.PI / 6;
-                    g.DrawLine(myPen, origin.X, origin.Y, (int)(r * Math.Cos(angle)) + origin.X, (int)(r * Math.Sin(angle)) + origin.Y);
-                    angle -= Math.PI / 3;
-                    g.DrawLine(myPen, origin.X, origin.Y, (int)(r * Math.Cos(angle)) + origin.X, (int)(r * Math.Sin(angle)) + origin.Y);
+                case (EndType.WideArrow):
                     break;
                 case (EndType.PlayTheMan):
                     Point origin3 = points[points.Count - 1];
