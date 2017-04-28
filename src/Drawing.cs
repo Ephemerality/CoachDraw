@@ -170,16 +170,24 @@ namespace CoachDraw
             }
             if (getAggregateLength(0, points.Count - 1) < 5) return false; // Line doesn't actually seem to go anywhere. return false so that sucker can be removed!
             setHitBox();
-            if (endType == EndType.Arrow || endType == EndType.WideArrow)
+            switch (endType)
             {
-                GraphicsPath arrow_path = new GraphicsPath();
-                int neww = endType == EndType.WideArrow ? 14 : 7;
-                double newx = neww * Math.Cos(Math.PI / 3);
-                double newy = neww * Math.Sin(Math.PI / 3);
-                arrow_path.AddLine(0, 0, (float)newx * -1, (float)newy * -1);
-                arrow_path.AddLine(0, 0, (float)newx, (float)newy * -1);
-                CustomLineCap arrow_cap = new CustomLineCap(null, arrow_path);
-                myPen.CustomEndCap = arrow_cap;
+                case (EndType.Arrow):
+                case (EndType.WideArrow):
+                    GraphicsPath arrow_path = new GraphicsPath();
+                    int neww = endType == EndType.WideArrow ? 14 : 7;
+                    double newx = neww * Math.Cos(Math.PI / 3);
+                    double newy = neww * Math.Sin(Math.PI / 3);
+                    arrow_path.AddLine(0, 0, (float)newx * -1, (float)newy * -1);
+                    arrow_path.AddLine(0, 0, (float)newx, (float)newy * -1);
+                    CustomLineCap arrow_cap = new CustomLineCap(null, arrow_path);
+                    myPen.CustomEndCap = arrow_cap;
+                    break;
+                case (EndType.PlayTheMan):
+                    GraphicsPath arc = new GraphicsPath();
+                    arc.AddArc(-5, 0, 10, 10, 180, 180);
+                    myPen.CustomEndCap = new CustomLineCap(null, arc);
+                    break;
             }
             switch (lineType)
             {
@@ -374,30 +382,7 @@ namespace CoachDraw
                 case (0):
                 case (EndType.Arrow):
                 case (EndType.WideArrow):
-                    break;
                 case (EndType.PlayTheMan):
-                    Point origin3 = points[points.Count - 1];
-                    Point first3 = (points.Count > 5 ? points[points.Count - 5] : points[0]);
-                    int r3 = 10;
-                    double a3 = Math.Atan2(first3.Y - origin3.Y, first3.X - origin3.X);
-                    List<Point> curvePoints = new List<Point>();
-                    a3 += Math.PI / 2;
-                    double slope = (double)(origin3.Y - first3.Y) / (double)(origin3.X - first3.X);
-                    if (origin3.X - first3.X < 0)
-                    {
-                        curvePoints.Add(new Point((int)(r3 * Math.Cos(a3)) + origin3.X - 5, (int)(r3 * Math.Sin(a3)) + origin3.Y - (int)(slope * 5)));
-                        curvePoints.Add(origin3);
-                        a3 -= Math.PI;
-                        curvePoints.Add(new Point((int)(r3 * Math.Cos(a3)) + origin3.X - 5, (int)(r3 * Math.Sin(a3)) + origin3.Y - (int)(slope * 5)));
-                    }
-                    else
-                    {
-                        curvePoints.Add(new Point((int)(r3 * Math.Cos(a3)) + origin3.X + 5, (int)(r3 * Math.Sin(a3)) + origin3.Y + (int)(slope * 5)));
-                        curvePoints.Add(origin3);
-                        a3 -= Math.PI;
-                        curvePoints.Add(new Point((int)(r3 * Math.Cos(a3)) + origin3.X + 5, (int)(r3 * Math.Sin(a3)) + origin3.Y + (int)(slope * 5)));
-                    }
-                    g.DrawCurve(myPen, curvePoints.ToArray(), 1.0F);
                     break;
                 case (EndType.Stop):
                     Point origin2 = points[points.Count - 1];
