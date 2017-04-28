@@ -678,7 +678,7 @@ namespace CoachDraw
                     PrintMultiplePlays(mp.plays);
                 }
                 lastSelectedMultiPrint = mp.lastSelected;
-                lastSetMultiPrint = mp.plays;
+                lastSetMultiPrint = mp.plays ?? new List<string>() { "", "", "", "" };
             }
         }
 
