@@ -101,6 +101,7 @@ namespace CoachDraw
 
         private void btnSet_Click(object sender, EventArgs e)
         {
+            if (dgvFiles.SelectedCells.Count == 0) return;
             int index = Convert.ToInt32(((Button)sender).Name.Replace("btnSet", ""));
             txtPlay[index].Text = (string)dgvFiles.SelectedRows[0].Cells[1].Value;
             txtPlay[index].Tag = (string)dgvFiles.SelectedRows[0].Cells[2].Value;
