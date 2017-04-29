@@ -437,7 +437,7 @@ namespace CoachDraw
 
         private void LineTypeBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if(LineTypeBox.Text == "Shot" || LineTypeBox.Text == "Pass")
+            if(LineTypeBox.Text == "Shot" || LineTypeBox.Text == "Pass" || LineTypeBox.Text == "Lateral")
             {
                 ItemTypeBox.SelectedIndex = 9;
                 EndTypeBox.SelectedIndex = 0;
@@ -449,6 +449,11 @@ namespace CoachDraw
             {
                 EndTypeBox.SelectedIndex = 1;
                 EndTypeBox.Enabled = false;
+            }
+            else if (LineTypeBox.Text == "Lateral")
+            {
+                EndTypeBox.Enabled = true;
+                Pencil.Enabled = false;
             }
             else
             {

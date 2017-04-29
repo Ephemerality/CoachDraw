@@ -243,10 +243,6 @@ namespace CoachDraw
                             firstLine = nextPoint;
                         }
                     }
-                    else
-                    {
-                        Debugger.Break();
-                    }
                     break;
                 case (LineType.CarryingPuck):
                     if (points.Count == 2)
