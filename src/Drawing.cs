@@ -161,6 +161,7 @@ namespace CoachDraw
         public bool draw(Graphics g, bool selected, Rectangle skipBox)
         {
             Pen myPen = (selected ? new Pen(Color.FromArgb(255 - color.R, 255 - color.G, 255 - color.B), lineWidth) : new Pen(color, lineWidth));
+            Pen cappedPen = (Pen)myPen.Clone();
             if (!smoothed && lineType != LineType.Lateral && points.Count >= 20)
             {
                 //points = Smoothing.DouglasPeuckerReduction(points, 20.0);
@@ -181,41 +182,46 @@ namespace CoachDraw
                     double newy = neww * Math.Sin(Math.PI / 3);
                     end_path.AddLine(0, 0, (float)newx * -1, (float)newy * -1);
                     end_path.AddLine(0, 0, (float)newx, (float)newy * -1);
-                    CustomLineCap arrow_cap = new CustomLineCap(null, end_path);
-                    myPen.CustomEndCap = arrow_cap;
                     break;
                 case (EndType.PlayTheMan):
                     end_path.AddArc(-5, 0, 10, 10, 180, 180);
-                    myPen.CustomEndCap = new CustomLineCap(null, end_path);
                     break;
                 case (EndType.Stop):
                     end_path.AddLine(-5, 3, 5, 3);
                     break;
             }
-            myPen.CustomEndCap = new CustomLineCap(null, end_path);
+            cappedPen.CustomEndCap = new CustomLineCap(null, end_path);
 
             switch (lineType)
             {
                 case (LineType.Forward):
                     if (points.Count > 2)
-                        g.DrawCurve(myPen, points.ToArray(), 0, points.Count - 2, 0.5F);
+                        g.DrawCurve(cappedPen, points.ToArray(), 0, points.Count - 2, 0.5F);
                     else
-                        g.DrawCurve(myPen, points.ToArray(), 0, points.Count - 1, 0.5F);
+                        g.DrawCurve(cappedPen, points.ToArray(), 0, points.Count - 1, 0.5F);
                     break;
                 case (LineType.Shot):
                     Point origin = points[points.Count - 1];
                     Point first = points[0];
                     int r = 8;
                     double a2 = Math.Atan2(first.Y - origin.Y, first.X - origin.X);
-                    g.DrawLine(myPen, (int)(r * Math.Cos(a2 + Math.PI / 2)) + first.X, (int)(r * Math.Sin(a2 + Math.PI / 2)) + first.Y,
-                        (int)((8 / Math.Sin(Math.PI / 6)) * Math.Cos(a2 + Math.PI / 6)) + origin.X, (int)((8 / Math.Sin(Math.PI / 6)) * Math.Sin(a2 + Math.PI / 6)) + origin.Y);
-                    g.DrawLine(myPen, (int)(r * Math.Cos(a2 - Math.PI / 2)) + first.X, (int)(r * Math.Sin(a2 - Math.PI / 2)) + first.Y,
-                        (int)((8 / Math.Sin(Math.PI / 6)) * Math.Cos(a2 - Math.PI / 6)) + origin.X, (int)((8 / Math.Sin(Math.PI / 6)) * Math.Sin(a2 - Math.PI / 6)) + origin.Y);
+                    using (Pen newPen = new Pen(color, lineWidth))
+                    {
+                        Matrix move = new Matrix();
+                        move.Translate(4, 8);
+                        end_path.Transform(move);
+                        newPen.CustomEndCap = new CustomLineCap(null, end_path);
+                        g.DrawLine(myPen, (int)(r * Math.Cos(a2 + Math.PI / 2)) + first.X, (int)(r * Math.Sin(a2 + Math.PI / 2)) + first.Y,
+                            (int)((8 / Math.Sin(Math.PI / 6)) * Math.Cos(a2 + Math.PI / 6)) + origin.X, (int)((8 / Math.Sin(Math.PI / 6)) * Math.Sin(a2 + Math.PI / 6)) + origin.Y);
+                        g.DrawLine(newPen, (int)(r * Math.Cos(a2 - Math.PI / 2)) + first.X, (int)(r * Math.Sin(a2 - Math.PI / 2)) + first.Y,
+                            (int)((8 / Math.Sin(Math.PI / 6)) * Math.Cos(a2 - Math.PI / 6)) + origin.X, (int)((8 / Math.Sin(Math.PI / 6)) * Math.Sin(a2 - Math.PI / 6)) + origin.Y);
+                    }
                     break;
                 case (LineType.Pass):
                     using (Pen newPen = new Pen(color, lineWidth))
                     {
                         newPen.DashStyle = DashStyle.Dash;
+                        newPen.CustomEndCap = new CustomLineCap(null, end_path);
                         g.DrawCurve(newPen, points.ToArray());
                     }
                     break;
@@ -225,7 +231,7 @@ namespace CoachDraw
                         Point firstLine = Smoothing.getPointFromDistance(points[0], points[1], 30);
                         Point secondLine = Smoothing.getPointFromDistance(points[1], points[0], 30);
                         g.DrawLine(myPen, points[0], firstLine);
-                        g.DrawLine(myPen, secondLine, points[1]);
+                        g.DrawLine(cappedPen, secondLine, points[1]);
                         float angle = Smoothing.getAngle(points[0], points[1]) + 90;
                         while (Smoothing.getLineLength(firstLine, secondLine) > 30)
                         {
@@ -262,11 +268,11 @@ namespace CoachDraw
                         g.RotateTransform(angle);
                         g.DrawLines(myPen, cpoints);
                         g.ResetTransform();
-                        g.DrawLine(myPen, points[0], points[1]);
+                        g.DrawLine(cappedPen, points[0], points[1]);
                     }
                     else
                     {
-                        g.DrawCurve(myPen, points.ToArray());
+                        g.DrawCurve(cappedPen, points.ToArray());
                         List<PointF> cpoints = new List<PointF>();
                         int start = 0;
                         bool bottom = false;
@@ -319,7 +325,7 @@ namespace CoachDraw
                             point.Y = -1 * (float)(Math.Sin((10 * Math.PI * i) / 200) * 10);
                             if (Math.Round(point.Y, 1) == 0 && lineLength - 15 < i + 20)
                             {
-                                g.DrawLine(myPen, point.X, 0, lineLength, 0);
+                                g.DrawLine(cappedPen, point.X, 0, lineLength, 0);
                                 break;
                             }
                             cpoints.Add(point);
