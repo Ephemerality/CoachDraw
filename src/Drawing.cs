@@ -170,25 +170,30 @@ namespace CoachDraw
             }
             if (getAggregateLength(0, points.Count - 1) < 5) return false; // Line doesn't actually seem to go anywhere. return false so that sucker can be removed!
             setHitBox();
+
+            GraphicsPath end_path = new GraphicsPath();
             switch (endType)
             {
                 case (EndType.Arrow):
                 case (EndType.WideArrow):
-                    GraphicsPath arrow_path = new GraphicsPath();
                     int neww = endType == EndType.WideArrow ? 14 : 7;
                     double newx = neww * Math.Cos(Math.PI / 3);
                     double newy = neww * Math.Sin(Math.PI / 3);
-                    arrow_path.AddLine(0, 0, (float)newx * -1, (float)newy * -1);
-                    arrow_path.AddLine(0, 0, (float)newx, (float)newy * -1);
-                    CustomLineCap arrow_cap = new CustomLineCap(null, arrow_path);
+                    end_path.AddLine(0, 0, (float)newx * -1, (float)newy * -1);
+                    end_path.AddLine(0, 0, (float)newx, (float)newy * -1);
+                    CustomLineCap arrow_cap = new CustomLineCap(null, end_path);
                     myPen.CustomEndCap = arrow_cap;
                     break;
                 case (EndType.PlayTheMan):
-                    GraphicsPath arc = new GraphicsPath();
-                    arc.AddArc(-5, 0, 10, 10, 180, 180);
-                    myPen.CustomEndCap = new CustomLineCap(null, arc);
+                    end_path.AddArc(-5, 0, 10, 10, 180, 180);
+                    myPen.CustomEndCap = new CustomLineCap(null, end_path);
+                    break;
+                case (EndType.Stop):
+                    end_path.AddLine(-5, 3, 5, 3);
                     break;
             }
+            myPen.CustomEndCap = new CustomLineCap(null, end_path);
+
             switch (lineType)
             {
                 case (LineType.Forward):
@@ -369,30 +374,6 @@ namespace CoachDraw
                             bottom = !bottom;
                         }
                     }
-                    break;
-                default:
-                    Debugger.Break();
-                    break;
-            }
-            // Reset end cap
-            myPen.CustomEndCap = new CustomLineCap(null, new GraphicsPath());
-
-            switch (endType)
-            {
-                case (0):
-                case (EndType.Arrow):
-                case (EndType.WideArrow):
-                case (EndType.PlayTheMan):
-                    break;
-                case (EndType.Stop):
-                    Point origin2 = points[points.Count - 1];
-                    Point first2 = (points.Count > 5 ? points[points.Count - 5] : points[0]);
-                    int r2 = 10;
-                    double a2 = Math.Atan2(first2.Y - origin2.Y, first2.X - origin2.X);
-                    a2 += Math.PI / 2;
-                    g.DrawLine(myPen, origin2.X, origin2.Y, (int)(r2 * Math.Cos(a2)) + origin2.X, (int)(r2 * Math.Sin(a2)) + origin2.Y);
-                    a2 -= Math.PI;
-                    g.DrawLine(myPen, origin2.X, origin2.Y, (int)(r2 * Math.Cos(a2)) + origin2.X, (int)(r2 * Math.Sin(a2)) + origin2.Y);
                     break;
                 default:
                     Debugger.Break();
