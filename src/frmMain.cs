@@ -236,8 +236,7 @@ namespace CoachDraw
             {
                 if (next.Owner.GetType() == typeof(ContextMenuStrip))
                 {
-                    if ((int)next.Owner.Tag == -1) i = (int)next.Tag;
-                    else i = (int)next.Owner.Tag;
+                    i = ((int)next.Owner.Tag == -1) ? (int)next.Tag : (int)next.Owner.Tag;
                     break;
                 }
                 next = next.OwnerItem;
@@ -271,11 +270,7 @@ namespace CoachDraw
         private void deleteItem(object sender, EventArgs e)
         {
             ToolStripMenuItem mn = (ToolStripMenuItem)sender;
-            int i;
-            if (mn.Owner.GetType() == typeof(ContextMenuStrip))
-               i = (int)mn.Owner.Tag;
-            else
-               i = (int)mn.OwnerItem.Tag;
+            int i = (mn.Owner.GetType() == typeof(ContextMenuStrip)) ? (int)mn.Owner.Tag : (int)mn.OwnerItem.Tag;
             objs.RemoveAt(i);
             saved = false;
             redraw();
@@ -496,6 +491,7 @@ namespace CoachDraw
                 }
                 Properties.Settings.Default.recentFiles = sc;
                 Properties.Settings.Default.Save();
+                recentFilesToolStripMenuItem.Enabled = sc.Count > 0;
                 if (sc.Count > 0) recentFilesToolStripMenuItem.Enabled = true;
                 else recentFilesToolStripMenuItem.Enabled = false;
             }
