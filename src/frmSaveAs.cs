@@ -51,7 +51,7 @@ namespace CoachDraw
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error creating category:\r\n" + ex.ToString());
+                MessageBox.Show("Error creating category:\r\n" + ex);
             }
         }
 

@@ -13,7 +13,7 @@ namespace CoachDraw
 {
     public partial class frmManage : Form
     {
-        private BindingList<Tuple<string, string>> categories = new BindingList<Tuple<string, string>>();
+        private readonly BindingList<Tuple<string, string>> categories = new BindingList<Tuple<string, string>>();
         public string openPlay = "";
 
         public frmManage()
@@ -133,7 +133,7 @@ namespace CoachDraw
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error renaming category:\r\n" + ex.ToString());
+                MessageBox.Show("Error renaming category:\r\n" + ex);
             }
         }
 
@@ -188,7 +188,7 @@ namespace CoachDraw
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error renaming play:\r\n" + ex.ToString());
+                    MessageBox.Show("Error renaming play:\r\n" + ex);
                 }
             }
         }
@@ -203,7 +203,7 @@ namespace CoachDraw
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error deleting play:\r\n" + ex.ToString());
+                    MessageBox.Show("Error deleting play:\r\n" + ex);
                 }
             }
             else

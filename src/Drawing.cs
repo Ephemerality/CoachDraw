@@ -45,7 +45,7 @@ namespace CoachDraw
     public class drawObj
     {
         public ItemType objType = ItemType.None;
-        public Line objLine = null;
+        public Line objLine;
         public int objLabel = -1;
         public Point objLoc;
         public Color color = Color.Blue;
@@ -119,8 +119,8 @@ namespace CoachDraw
 
     public class Line
     {
-        public LineType lineType = LineType.Forward; //Forward = 0; Backward = 1; CarryingPuck = 2; Pass = 3; Shot = 4; Lateral = 5;
-        public EndType endType = EndType.None; //None = 0; Arrow = 1; Man = 2; Stop = 3;
+        public LineType lineType = LineType.Forward; //Forward = 0, Backward = 1, CarryingPuck = 2, Pass = 3, Shot = 4, Lateral = 5
+        public EndType endType = EndType.None; //None = 0, Arrow = 1, Man = 2, Stop = 3
         public byte lineWidth = 2;
         public List<Point> points;
         public Color color;

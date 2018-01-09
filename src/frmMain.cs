@@ -29,14 +29,14 @@ namespace CoachDraw
 
         int rinkWidth = 1000;
         int rinkHeight = 500;
-        Point startPoint;
-        Point endPoint;
+        Point startPoint = new Point();
+        Point endPoint = new Point();
         bool mouseDown;
         Bitmap snapshot;
         Bitmap tempDraw;
         List<Point> tempcoords;
         List<drawObj> objs;
-        RinkSpecs curSpecs = new RinkSpecs(5); //Scale
+        readonly RinkSpecs curSpecs = new RinkSpecs(5); //Scale
         string selectedTool = "Line";
         string currentFile = "";
         bool saved = true;
