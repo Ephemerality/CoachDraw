@@ -490,7 +490,6 @@
         private System.Windows.Forms.ToolStripMenuItem saveAsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem printCurrent;
         private System.Windows.Forms.ToolStripMenuItem printMultiple;
-        private System.Windows.Forms.ToolStripMenuItem selectDraw;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem5;
         private System.Windows.Forms.ToolStripMenuItem selectPrint;
     }
