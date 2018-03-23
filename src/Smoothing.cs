@@ -51,9 +51,7 @@ namespace CoachDraw
         public static List<Point> McMasters(List<Point> points)
         {
             if (points == null || points.Count < 5) return points;
-            List<Point> returnPoints = new List<Point>();
-            returnPoints.Add(points[0]);
-            returnPoints.Add(points[1]);
+            List<Point> returnPoints = new List<Point> { points[0], points[1] };
             for (int i = 2; i < points.Count - 2; i++)
             {
                 double x = (points[i - 2].X + points[i - 1].X + points[i].X + points[i + 1].X + points[i + 2].X) / 5.0;
@@ -75,11 +73,8 @@ namespace CoachDraw
 
             Int32 firstPoint = 0;
             Int32 lastPoint = Points.Count - 1;
-            List<Int32> pointIndexsToKeep = new List<Int32>();
-
             //Add the first and last index to the keepers
-            pointIndexsToKeep.Add(firstPoint);
-            pointIndexsToKeep.Add(lastPoint);
+            List<Int32> pointIndexsToKeep = new List<Int32>() { firstPoint, lastPoint };
 
             //The first and the last point cannot be the same
             while (Points[firstPoint].Equals(Points[lastPoint]))
