@@ -127,7 +127,7 @@ namespace CoachDraw
                 fileName += ".PLYX";
             if (File.Exists(fileName))
             {
-                if (DialogResult.No == MessageBox.Show("File already exists. Are you sure you want to overwrite it?\r\nThis cannot be undone.", "File Exists", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2)) ;
+                if (DialogResult.No == MessageBox.Show("File already exists. Are you sure you want to overwrite it?\r\nThis cannot be undone.", "File Exists", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2))
                     return;
             }
             DialogResult = DialogResult.Yes;
