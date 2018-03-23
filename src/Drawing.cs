@@ -254,9 +254,11 @@ namespace CoachDraw
                         float angle = Smoothing.getAngle(points[0], points[1]);
                         for (int i = 0; i < lineLength - 15; i++)
                         {
-                            cpoints[i] = new PointF();
-                            cpoints[i].X = i;
-                            cpoints[i].Y = -1 * (float)(Math.Sin((10 * Math.PI * i) / 200) * 10);
+                            cpoints[i] = new PointF
+                            {
+                                X = i,
+                                Y = -1 * (float)(Math.Sin((10 * Math.PI * i) / 200) * 10)
+                            };
                             if (Math.Round(cpoints[i].Y, 1) == 0 && lineLength - 15 < i + 20)
                                 break;
                         }
@@ -291,9 +293,11 @@ namespace CoachDraw
 
                             for (int j = 0; j <= length; j++)
                             {
-                                PointF newPoint = new PointF();
-                                newPoint.X = j;
-                                newPoint.Y = -1 * (float)(Math.Sin((10 * Math.PI * (bottom ? j + 20 : j)) / 200) * 10);
+                                PointF newPoint = new PointF
+                                {
+                                    X = j,
+                                    Y = -1 * (float)(Math.Sin((10 * Math.PI * (bottom ? j + 20 : j)) / 200) * 10)
+                                };
                                 cpoints.Add(newPoint);
                             }
                             g.TranslateTransform(points[start].X, points[start].Y);
@@ -316,9 +320,11 @@ namespace CoachDraw
                         g.RotateTransform(angle);
                         for (int i = 0; i < lineLength - 15; i++)
                         {
-                            PointF point = new PointF();
-                            point.X = i;
-                            point.Y = -1 * (float)(Math.Sin((10 * Math.PI * i) / 200) * 10);
+                            PointF point = new PointF
+                            {
+                                X = i,
+                                Y = -1 * (float)(Math.Sin((10 * Math.PI * i) / 200) * 10)
+                            };
                             if (Math.Round(point.Y, 1) == 0 && lineLength - 15 < i + 20)
                             {
                                 g.DrawLine(cappedPen, point.X, 0, lineLength, 0);
@@ -360,9 +366,11 @@ namespace CoachDraw
                             g.RotateTransform(angle);
                             for (int j = 0; j < length; j++)
                             {
-                                PointF newPoint = new PointF();
-                                newPoint.X = j;
-                                newPoint.Y = -1 * (float)(Math.Sin((10 * Math.PI * (bottom ? j + 20 : j)) / 200) * 10);
+                                PointF newPoint = new PointF
+                                {
+                                    X = j,
+                                    Y = -1 * (float)(Math.Sin((10 * Math.PI * (bottom ? j + 20 : j)) / 200) * 10)
+                                };
                                 cpoints.Add(newPoint);
                                 if (newPoint.Y > -4 && newPoint.Y < 4)
                                 {

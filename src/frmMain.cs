@@ -157,17 +157,21 @@ namespace CoachDraw
                 }
                 endPoint.X = Math.Min(e.X, panel1.Width);
                 endPoint.Y = Math.Min(e.Y, panel1.Height);
-                drawObj newObj = new drawObj();
-                newObj.objType = (ItemType)Enum.Parse(typeof(ItemType), ItemTypeBox.Text.Replace(" ", "").Replace(".", ""));
-                newObj.objLoc = startPoint;
-                newObj.color = colorDialog1.Color;
-                newObj.objLabel = (PlayerNumBox.Text == "None" ? -1 : int.Parse(PlayerNumBox.Text));
+                drawObj newObj = new drawObj()
+                {
+                    objType = (ItemType)Enum.Parse(typeof(ItemType), ItemTypeBox.Text.Replace(" ", "").Replace(".", "")),
+                    objLoc = startPoint,
+                    color = colorDialog1.Color,
+                    objLabel = (PlayerNumBox.Text == "None" ? -1 : int.Parse(PlayerNumBox.Text))
+                };
                 if (!startPoint.Equals(endPoint) || tempcoords.Count > 0)
                 {
-                    newObj.objLine = new Line();
-                    newObj.objLine.lineType = (LineType)Enum.Parse(typeof(LineType), LineTypeBox.Text.Replace(" ", ""));
-                    newObj.objLine.endType = (EndType)Enum.Parse(typeof(EndType), EndTypeBox.Text.Replace(" ", ""));
-                    newObj.objLine.color = colorDialog1.Color;
+                    newObj.objLine = new Line()
+                    {
+                        lineType = (LineType)Enum.Parse(typeof(LineType), LineTypeBox.Text.Replace(" ", "")),
+                        endType = (EndType)Enum.Parse(typeof(EndType), EndTypeBox.Text.Replace(" ", "")),
+                        color = colorDialog1.Color
+                    };
                     foreach (ToolStripMenuItem t in widthBox.DropDownItems)
                         if (t.Checked) newObj.objLine.lineWidth = byte.Parse(t.Text.Remove(1));
 
@@ -303,13 +307,10 @@ namespace CoachDraw
                 endList.Add(m);
             }
             ToolStripItem[] mn = new ToolStripItem[5];
-            mn[0] = new ToolStripMenuItem("Item Type", null, itemList.ToArray());
-            mn[0].Tag = 0;
-            mn[1] = new ToolStripMenuItem("Line Type", null, lineList.ToArray());
-            mn[1].Tag = 1;
+            mn[0] = new ToolStripMenuItem("Item Type", null, itemList.ToArray()) { Tag = 0 };
+            mn[1] = new ToolStripMenuItem("Line Type", null, lineList.ToArray()) { Tag = 1 };
             if (lt == -1) mn[1].Enabled = false;
-            mn[2] = new ToolStripMenuItem("End Type", null, endList.ToArray());
-            mn[2].Tag = 2;
+            mn[2] = new ToolStripMenuItem("End Type", null, endList.ToArray()) { Tag = 2 };
             if (et == -1) mn[2].Enabled = false;
             mn[3] = new ToolStripSeparator();
             mn[4] = new ToolStripMenuItem("Delete", null, new EventHandler(deleteItem));
@@ -345,10 +346,12 @@ namespace CoachDraw
                 /**  Lines  **/
                 g.DrawLine(bluePen, (rinkWidth / 2) - curSpecs.BlueLineFromCenter, 0, (rinkWidth / 2) - curSpecs.BlueLineFromCenter, rinkHeight); //Left blue line
                 g.DrawLine(bluePen, (rinkWidth / 2) + curSpecs.BlueLineFromCenter, 0, (rinkWidth / 2) + curSpecs.BlueLineFromCenter, rinkHeight); //Right blue line
-                Pen centerPen = new Pen(Color.Red, 5);
-                centerPen.DashCap = DashCap.Round;
-                centerPen.DashStyle = DashStyle.Dash;
-                centerPen.DashOffset = 1;
+                Pen centerPen = new Pen(Color.Red, 5)
+                {
+                    DashCap = DashCap.Round,
+                    DashStyle = DashStyle.Dash,
+                    DashOffset = 1
+                };
                 g.DrawLine(centerPen, (rinkWidth / 2), 0, (rinkWidth / 2), rinkHeight); //Centerline
                 centerPen.Dispose();
                 g.DrawLine(redPen, 65, 8, 65, rinkHeight - 8); //Left red line
@@ -485,8 +488,7 @@ namespace CoachDraw
                         sc.RemoveAt(i--);
                         continue;
                     }
-                    ToolStripMenuItem tempItem = new ToolStripMenuItem(compactString(path, 50), null, new EventHandler(this.clickRecentFile));
-                    tempItem.Tag = path;
+                    ToolStripMenuItem tempItem = new ToolStripMenuItem(compactString(path, 50), null, new EventHandler(this.clickRecentFile)) { Tag = path };
                     recentFilesToolStripMenuItem.DropDownItems.Add(tempItem);
                 }
                 Properties.Settings.Default.recentFiles = sc;
@@ -556,9 +558,11 @@ namespace CoachDraw
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (!checkSaved("opening a new play")) return;
-            OpenFileDialog dlg = new OpenFileDialog();
-            dlg.Filter = "All supported files (*.ply, *.plyx)|*.ply;*.plyx|New play files (*.plyx)|*.plyx|HockeyVision play files (*.ply)|*.ply|All files (*.*)|*.*";
-            dlg.FilterIndex = 2;
+            OpenFileDialog dlg = new OpenFileDialog
+            {
+                Filter = "All supported files (*.ply, *.plyx)|*.ply;*.plyx|New play files (*.plyx)|*.plyx|HockeyVision play files (*.ply)|*.ply|All files (*.*)|*.*",
+                FilterIndex = 2
+            };
             if (dlg.ShowDialog() == DialogResult.OK)
                 openFile(dlg.FileName, true);
         }
@@ -658,12 +662,10 @@ namespace CoachDraw
                 pe.Graphics.DrawString(txtPlayDesc.Text, descFont, new SolidBrush(Color.Black), new RectangleF(50.0f, posy, 900.0f, 750.0f - posy));
                 pe.Graphics.DrawString("CoachDraw © 2017", new Font("Helvetica", 5.0f), new SolidBrush(Color.Black), 50, 825.0f);
             };
-            PrintDialog dialog = new PrintDialog();
-            dialog.Document = pd;
+            PrintDialog dialog = new PrintDialog() { Document = pd };
             if (dialog.ShowDialog() == DialogResult.OK)
             {
-                PrintPreviewDialog pp = new PrintPreviewDialog();
-                pp.Document = pd;
+                PrintPreviewDialog pp = new PrintPreviewDialog() { Document = pd };
                 pp.ShowDialog();
                 //pd.PrinterSettings = dialog.PrinterSettings;
                 //pd.Print();
@@ -725,14 +727,15 @@ namespace CoachDraw
                 posy += 25.0f;
                 pe.Graphics.DrawString("CoachDraw © 2017", new Font("Helvetica", 5.0f), new SolidBrush(Color.Black), 50, posy);
             };
-            PrintDialog dialog = new PrintDialog();
-            dialog.Document = pd;
+            PrintDialog dialog = new PrintDialog() { Document = pd };
             if (dialog.ShowDialog() == DialogResult.OK)
             {
-                PrintPreviewDialog pp = new PrintPreviewDialog();
-                pp.Document = pd;
-                pp.Height = this.Height;
-                pp.Width = this.Width;
+                PrintPreviewDialog pp = new PrintPreviewDialog
+                {
+                    Document = pd,
+                    Height = this.Height,
+                    Width = this.Width
+                };
                 pp.ShowDialog();
                 //pd.PrinterSettings = dialog.PrinterSettings;
                 //pd.Print();
