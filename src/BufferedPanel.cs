@@ -2,11 +2,11 @@
 
 namespace CoachDraw
 {
-    public partial class BufferedPanel : Panel
+    public sealed class BufferedPanel : Panel
     {
         public BufferedPanel()
         {
-            this.DoubleBuffered = true;
+            DoubleBuffered = true;
         }
     }
 }
