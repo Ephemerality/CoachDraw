@@ -3,7 +3,7 @@ using System.IO;
 
 namespace CoachDraw
 {
-    static class Utils
+    internal static class Utils
     {
         public static string StripInvalid(string input)
         {

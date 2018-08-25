@@ -10,7 +10,7 @@ namespace CoachDraw
 {
     public partial class frmSaveAs : Form
     {
-        private BindingList<Tuple<string, string>> categories = new BindingList<Tuple<string, string>>();
+        private readonly BindingList<Tuple<string, string>> _categories = new BindingList<Tuple<string, string>>();
         public string playName = "";
         public string fileName = "";
 
@@ -32,7 +32,8 @@ namespace CoachDraw
                     MessageBox.Show("Category already exists.", "Invalid Name");
                     return;
                 }
-                else if (Properties.Settings.Default.playDir.Length + result.Length > 240)
+
+                if (Properties.Settings.Default.playDir.Length + result.Length > 240)
                 {
                     MessageBox.Show("Category name is too long.", "Invalid Name");
                     return;
@@ -42,9 +43,9 @@ namespace CoachDraw
             {
                 Directory.CreateDirectory(Properties.Settings.Default.playDir + @"\" + result);
                 Tuple<string, string> newCategory = new Tuple<string, string>(result, Properties.Settings.Default.playDir + @"\" + result);
-                categories.Add(newCategory);
+                _categories.Add(newCategory);
                 lstCategories.SelectedItem = newCategory;
-                GenerateName(categories[lstCategories.SelectedIndex].Item2);
+                GenerateName(_categories[lstCategories.SelectedIndex].Item2);
             }
             catch (Exception ex)
             {
@@ -59,8 +60,8 @@ namespace CoachDraw
                 txtFilename.Text = "";
                 return;
             }
-            List<string> files = Directory.EnumerateFiles(categoryPath).Select(r => Path.GetFileNameWithoutExtension(r)).ToList<string>();
-            for (uint i = 0; i < UInt32.MaxValue; i++)
+            var files = Directory.EnumerateFiles(categoryPath).Select(Path.GetFileNameWithoutExtension).ToList();
+            for (uint i = 0; i < uint.MaxValue; i++)
             {
                 if (!files.Contains(i.ToString("D4")))
                 {
@@ -73,15 +74,15 @@ namespace CoachDraw
         private void LoadCategories(string dir)
         {
             if (!Directory.Exists(dir)) return;
-            categories.Clear();
+            _categories.Clear();
             lstCategories.SelectedIndexChanged -= lstCategories_SelectedIndexChanged;
-            List<string> dirs = new List<string>(Directory.EnumerateDirectories(dir));
+            var dirs = new List<string>(Directory.EnumerateDirectories(dir));
             foreach (string category in dirs)
             {
-                categories.Add(new Tuple<string, string>(Path.GetFileName(category), category));
+                _categories.Add(new Tuple<string, string>(Path.GetFileName(category), category));
             }
             lstCategories.SelectedIndexChanged += lstCategories_SelectedIndexChanged;
-            GenerateName(categories[0].Item2);
+            GenerateName(_categories[0].Item2);
         }
 
         private void frmSaveAs_Load(object sender, EventArgs e)
@@ -93,7 +94,7 @@ namespace CoachDraw
                     Directory.CreateDirectory(playPath);
                 Properties.Settings.Default.playDir = playPath;
             }
-            lstCategories.DataSource = categories;
+            lstCategories.DataSource = _categories;
             lstCategories.DisplayMember = "Item1";
             lstCategories.ValueMember = "Item2";
             LoadCategories(Properties.Settings.Default.playDir);
@@ -108,7 +109,7 @@ namespace CoachDraw
         {
             lblFilename.Enabled = !chkGenerate.Checked;
             txtFilename.Enabled = !chkGenerate.Checked;
-            GenerateName(categories[lstCategories.SelectedIndex].Item2);
+            GenerateName(_categories[lstCategories.SelectedIndex].Item2);
         }
 
         private void btnSave_Click(object sender, EventArgs e)
@@ -119,7 +120,7 @@ namespace CoachDraw
                 return;
             }
             playName = txtPlayName.Text.Trim();
-            fileName = Path.Combine(categories[lstCategories.SelectedIndex].Item2, txtFilename.Text.Trim().ToUpper());
+            fileName = Path.Combine(_categories[lstCategories.SelectedIndex].Item2, txtFilename.Text.Trim().ToUpper());
             if (Path.GetExtension(fileName).ToUpper() != ".PLYX")
                 fileName += ".PLYX";
             if (File.Exists(fileName))

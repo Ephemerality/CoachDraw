@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Text;
@@ -28,7 +27,7 @@ namespace CoachDraw
             return BitConverter.ToUInt32(buf, 0);
         }
 
-        public static PlayInfo LoadPLYXFile(string filePath, ref List<drawObj> objs)
+        public static PlayInfo LoadPLYXFile(string filePath, ref List<DrawObj> objs)
         {
             PlayInfo result = new PlayInfo();
             using (BinaryReader bw = new BinaryReader(File.OpenRead(filePath), Encoding.UTF8))
@@ -39,25 +38,34 @@ namespace CoachDraw
                 int numObjs = bw.ReadInt32();
                 for (int i = 0; i < numObjs; i++)
                 {
-                    drawObj newObj = new drawObj();
-                    newObj.objType = (ItemType)bw.ReadByte();
-                    newObj.color = ColorTranslator.FromWin32(bw.ReadInt32());
-                    newObj.objLabel = bw.ReadInt32();
-                    newObj.objLoc.X = bw.ReadInt32();
-                    newObj.objLoc.Y = bw.ReadInt32();
+                    DrawObj newObj = new DrawObj
+                    {
+                        objType = (ItemType) bw.ReadByte(),
+                        color = ColorTranslator.FromWin32(bw.ReadInt32()),
+                        objLabel = bw.ReadInt32(),
+                        objLoc =
+                        {
+                            X = bw.ReadInt32(),
+                            Y = bw.ReadInt32()
+                        }
+                    };
                     if (bw.ReadBoolean())
                     {
-                        newObj.objLine = new Line();
-                        newObj.objLine.color = ColorTranslator.FromWin32(bw.ReadInt32());
-                        newObj.objLine.lineType = (LineType)bw.ReadByte();
-                        newObj.objLine.endType = (EndType)bw.ReadByte();
-                        newObj.objLine.lineWidth = bw.ReadByte();
+                        newObj.objLine = new Line
+                        {
+                            color = ColorTranslator.FromWin32(bw.ReadInt32()),
+                            lineType = (LineType) bw.ReadByte(),
+                            endType = (EndType) bw.ReadByte(),
+                            lineWidth = bw.ReadByte()
+                        };
                         int numPoints = bw.ReadInt32();
                         for (int j = 0; j < numPoints; j++)
                         {
-                            Point newPoint = new Point();
-                            newPoint.X = bw.ReadInt32();
-                            newPoint.Y = bw.ReadInt32();
+                            Point newPoint = new Point
+                            {
+                                X = bw.ReadInt32(),
+                                Y = bw.ReadInt32()
+                            };
                             newObj.objLine.points.Add(newPoint);
                         }
                         newObj.objLine.smoothed = bw.ReadBoolean();
@@ -68,39 +76,39 @@ namespace CoachDraw
             }
         }
 
-        public static bool savePLYXFile(string filePath, List<drawObj> objs, string playName, string playDesc, uint plyxVersion)
+        public static bool savePLYXFile(string filePath, List<DrawObj> objs, string playName, string playDesc, uint plyxVersion)
         {
-            using (BinaryWriter bw = new BinaryWriter(File.Open(filePath, FileMode.Create), Encoding.UTF8))
+            using (var bw = new BinaryWriter(File.Open(filePath, FileMode.Create), Encoding.UTF8))
             {
-                bw.Write(new char[] { 'P', 'L', 'Y', 'X' });
+                bw.Write(new [] { 'P', 'L', 'Y', 'X' });
                 bw.Write(plyxVersion);
                 bw.Write(playName);
                 bw.Write(playDesc);
                 bw.Write(objs.Count);
-                for (int i = 0; i < objs.Count; i++)
+                foreach (var obj in objs)
                 {
-                    bw.Write((byte)objs[i].objType);
-                    bw.Write(ColorTranslator.ToWin32(objs[i].color));
-                    bw.Write(objs[i].objLabel);
-                    bw.Write(objs[i].objLoc.X);
-                    bw.Write(objs[i].objLoc.Y);
-                    bw.Write((objs[i].objLine != null ? true : false));
-                    if (objs[i].objLine != null)
+                    bw.Write((byte)obj.objType);
+                    bw.Write(ColorTranslator.ToWin32(obj.color));
+                    bw.Write(obj.objLabel);
+                    bw.Write(obj.objLoc.X);
+                    bw.Write(obj.objLoc.Y);
+                    bw.Write(obj.objLine != null);
+                    if (obj.objLine != null)
                     {
-                        bw.Write(ColorTranslator.ToWin32(objs[i].objLine.color));
-                        bw.Write((byte)objs[i].objLine.lineType);
-                        bw.Write((byte)objs[i].objLine.endType);
-                        bw.Write(objs[i].objLine.lineWidth);
-                        bw.Write(objs[i].objLine.points.Count);
-                        for (int j = 0; j < objs[i].objLine.points.Count; j++)
+                        bw.Write(ColorTranslator.ToWin32(obj.objLine.color));
+                        bw.Write((byte)obj.objLine.lineType);
+                        bw.Write((byte)obj.objLine.endType);
+                        bw.Write(obj.objLine.lineWidth);
+                        bw.Write(obj.objLine.points.Count);
+                        foreach (var point in obj.objLine.points)
                         {
-                            bw.Write(objs[i].objLine.points[j].X);
-                            bw.Write(objs[i].objLine.points[j].Y);
+                            bw.Write(point.X);
+                            bw.Write(point.Y);
                         }
-                        bw.Write(objs[i].objLine.smoothed);
+                        bw.Write(obj.objLine.smoothed);
                     }
                 }
-                bw.Write(new char[] { 'E', 'N', 'D' });
+                bw.Write(new [] { 'E', 'N', 'D' });
             }
             return true;
         }
@@ -110,8 +118,9 @@ namespace CoachDraw
             if (!File.Exists(filePath)) return "";
             using (BinaryReader br = new BinaryReader(File.OpenRead(filePath), Encoding.UTF8))
             {
-                if (ValidatePLYXHeader(br.BaseStream) != 1) return "**Invalid play file**";
-                return br.ReadString();
+                return ValidatePLYXHeader(br.BaseStream) != 1
+                    ? "**Invalid play file**"
+                    : br.ReadString();
             }
         }
 
@@ -120,13 +129,11 @@ namespace CoachDraw
             if (!File.Exists(filePath)) return false;
             using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.ReadWrite))
             {
-                byte[] bytes;
-                int actualLen = 0;
                 BinaryReader br = new BinaryReader(fs, Encoding.UTF8);
                 if (ValidatePLYXHeader(br.BaseStream) != 1) return false;
                 br.ReadString();
-                actualLen = (int)(br.BaseStream.Length - br.BaseStream.Position);
-                bytes = br.ReadBytes(actualLen);
+                var actualLen = (int)(br.BaseStream.Length - br.BaseStream.Position);
+                var bytes = br.ReadBytes(actualLen);
                 BinaryWriter bw = new BinaryWriter(fs, Encoding.UTF8);
                 bw.BaseStream.Position = 8;
                 bw.Write(newName);
@@ -147,7 +154,8 @@ namespace CoachDraw
             }
         }
 
-        public static PlayInfo LoadPLYFile(string filePath, ref List<drawObj> objs)
+        // TODO: Review
+        public static PlayInfo LoadPLYFile(string filePath, ref List<DrawObj> objs)
         {
             PlayInfo result = new PlayInfo();
             if (!File.Exists(filePath)) return null;
@@ -178,10 +186,15 @@ namespace CoachDraw
                                 file.ReadLine();
                                 continue;
                             }
-                            drawObj newObj = new drawObj();
-                            newObj.objLine = new Line();
-                            newObj.objLine.lineWidth = byte.Parse(words[1]);
-                            newObj.objLine.lineType = (LineType)byte.Parse(words[2]);
+
+                            DrawObj newObj = new DrawObj
+                            {
+                                objLine = new Line
+                                {
+                                    lineWidth = byte.Parse(words[1]),
+                                    lineType = (LineType) byte.Parse(words[2])
+                                }
+                            };
                             if (int.Parse(words[4]) > 4) words[4] = "0";
                             if (words[4] == "-1") // end type can't be -1, broken object
                             {
@@ -199,7 +212,7 @@ namespace CoachDraw
                                 newObj.objLine.points.Add(new Point(int.Parse(words[j]), int.Parse(words[j + 1])));
                             }
                             // Remove bad lines
-                            if (!valid || (newObj.objLine.points.Count == 2 && Smoothing.getLineLength(newObj.objLine.points[0], newObj.objLine.points[1]) < 20))
+                            if (!valid || newObj.objLine.points.Count == 2 && Smoothing.GetLineLength(newObj.objLine.points[0], newObj.objLine.points[1]) < 20)
                                 newObj.objLine = null;
                             objs.Add(newObj);
                         }
@@ -208,9 +221,7 @@ namespace CoachDraw
                             /* 16711680 -1 1 9 855 290
                              * color, label (-1 for none), number of points (always 1), type, X, Y
                              */
-                            drawObj newObj;
-                            if (prevType == 3) newObj = new drawObj();
-                            else newObj = objs[objs.Count - 1];
+                            var newObj = prevType == 3 ? new DrawObj() : objs[objs.Count - 1];
                             newObj.objType = (ItemType)byte.Parse(words[3]);
                             newObj.objLoc = new Point(int.Parse(words[4]), int.Parse(words[5]));
                             newObj.color = ColorTranslator.FromWin32(int.Parse(words[0]));
@@ -240,8 +251,7 @@ namespace CoachDraw
             }
             catch (Exception e)
             {
-                Console.WriteLine("Exception: {0}", e);
-                Debugger.Break();
+                Console.WriteLine($"Exception: {e}");
                 return null;
             }
             return result;

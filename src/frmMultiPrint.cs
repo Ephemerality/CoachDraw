@@ -9,15 +9,15 @@ namespace CoachDraw
 {
     public partial class frmMultiPrint : Form
     {
-        private BindingList<Tuple<string, string>> categories = new BindingList<Tuple<string, string>>();
-        public List<string> plays;
-        public string lastSelected = "";
-        Control[] txtPlay;
+        private readonly BindingList<Tuple<string, string>> _categories = new BindingList<Tuple<string, string>>();
+        public List<string> Plays;
+        public string LastSelected = "";
+        private readonly Control[] _txtPlay;
 
         public frmMultiPrint(string currentPlay, string lastPlay, List<string> setPlays)
         {
             InitializeComponent();
-            txtPlay = new Control[] { txtPlay0, txtPlay1, txtPlay2, txtPlay3 };
+            _txtPlay = new Control[] { txtPlay0, txtPlay1, txtPlay2, txtPlay3 };
             if (Properties.Settings.Default.playDir == "")
             {
                 string playPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "CoachDraw");
@@ -26,7 +26,7 @@ namespace CoachDraw
                 Properties.Settings.Default.playDir = playPath;
                 Properties.Settings.Default.Save();
             }
-            lstCategories.DataSource = categories;
+            lstCategories.DataSource = _categories;
             lstCategories.DisplayMember = "Item1";
             lstCategories.ValueMember = "Item2";
             LoadCategories(Properties.Settings.Default.playDir);
@@ -36,16 +36,16 @@ namespace CoachDraw
                 SelectPlay(lastPlay);
             for (int i = 0; i < setPlays.Count; i++)
             {
-                txtPlay[i].Text = Plays.GetPLYXName(setPlays[i]);
-                txtPlay[i].Tag = setPlays[0];
+                _txtPlay[i].Text = CoachDraw.Plays.GetPLYXName(setPlays[i]);
+                _txtPlay[i].Tag = setPlays[0];
             }
         }
-        
+
         private void SelectPlay(string play)
         {
             if (play == "") return;
             string category = Path.GetDirectoryName(play);
-            lstCategories.SelectedItem = categories.First(r => r.Item2 == category);
+            lstCategories.SelectedItem = _categories.First(r => r.Item2 == category);
             dgvFiles.ClearSelection();
             foreach (DataGridViewRow row in dgvFiles.Rows)
             {
@@ -60,16 +60,16 @@ namespace CoachDraw
         private void LoadCategories(string dir)
         {
             if (!Directory.Exists(dir)) return;
-            categories.Clear();
+            _categories.Clear();
             lstCategories.SelectedIndexChanged -= lstCategories_SelectedIndexChanged;
             List<string> dirs = new List<string>(Directory.EnumerateDirectories(dir));
             foreach (string category in dirs)
             {
-                categories.Add(new Tuple<string, string>(Path.GetFileName(category), category));
+                _categories.Add(new Tuple<string, string>(Path.GetFileName(category), category));
             }
             lstCategories.SelectedIndexChanged += lstCategories_SelectedIndexChanged;
-            if (categories.Count > 0)
-                LoadPlays(categories[0].Item2);
+            if (_categories.Count > 0)
+                LoadPlays(_categories[0].Item2);
         }
 
         private void LoadPlays(string dir)
@@ -78,8 +78,8 @@ namespace CoachDraw
             List<string> files = new List<string>(Directory.EnumerateFiles(dir));
             foreach (string file in files)
             {
-                if (Path.GetExtension(file).ToUpper() != ".PLYX") continue;
-                dgvFiles.Rows.Add(Path.GetFileNameWithoutExtension(file), Plays.GetPLYXName(file), file);
+                if (Path.GetExtension(file)?.ToUpper() != ".PLYX") continue;
+                dgvFiles.Rows.Add(Path.GetFileNameWithoutExtension(file), CoachDraw.Plays.GetPLYXName(file), file);
             }
         }
 
@@ -91,27 +91,27 @@ namespace CoachDraw
         private void btnClear_Click(object sender, EventArgs e)
         {
             int index = Convert.ToInt32(((Button)sender).Name.Replace("btnClear", ""));
-            txtPlay[index].Text = "";
-            txtPlay[index].Tag = "";
+            _txtPlay[index].Text = "";
+            _txtPlay[index].Tag = "";
         }
 
         private void btnSet_Click(object sender, EventArgs e)
         {
             if (dgvFiles.SelectedCells.Count == 0) return;
             int index = Convert.ToInt32(((Button)sender).Name.Replace("btnSet", ""));
-            txtPlay[index].Text = (string)dgvFiles.SelectedRows[0].Cells[1].Value;
-            txtPlay[index].Tag = (string)dgvFiles.SelectedRows[0].Cells[2].Value;
+            _txtPlay[index].Text = (string)dgvFiles.SelectedRows[0].Cells[1].Value;
+            _txtPlay[index].Tag = (string)dgvFiles.SelectedRows[0].Cells[2].Value;
         }
 
         private void btnPrint_Click(object sender, EventArgs e)
         {
-            plays = new List<string>() { (string)txtPlay0.Tag, (string)txtPlay1.Tag, (string)txtPlay2.Tag, (string)txtPlay3.Tag };
-            if (plays.All(r => r == null))
+            Plays = new List<string> { (string)txtPlay0.Tag, (string)txtPlay1.Tag, (string)txtPlay2.Tag, (string)txtPlay3.Tag };
+            if (Plays.All(r => r == null))
             {
                 MessageBox.Show("Must have at least 1 play set to print!", "No Plays Selected");
                 return;
             }
-            lastSelected = dgvFiles.SelectedRows.Count > 0 ? (string)dgvFiles.SelectedRows[0].Cells[2].Value : "";
+            LastSelected = dgvFiles.SelectedRows.Count > 0 ? (string)dgvFiles.SelectedRows[0].Cells[2].Value : "";
             DialogResult = DialogResult.Yes;
             Close();
         }

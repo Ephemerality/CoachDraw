@@ -56,7 +56,7 @@ namespace CoachDraw
             List<string> files = new List<string>(Directory.EnumerateFiles(dir));
             foreach (string file in files)
             {
-                if (Path.GetExtension(file).ToUpper() != ".PLYX") continue;
+                if (Path.GetExtension(file)?.ToUpper() != ".PLYX") continue;
                 dgvFiles.Rows.Add(Path.GetFileNameWithoutExtension(file), Plays.GetPLYXName(file), file);
             }
             dgvFiles.CellValueChanged += dgvFiles_CellValueChanged;
@@ -79,7 +79,8 @@ namespace CoachDraw
                     MessageBox.Show("Category already exists.", "Invalid Name");
                     return;
                 }
-                else if (Properties.Settings.Default.playDir.Length + result.Length > 240)
+
+                if (Properties.Settings.Default.playDir.Length + result.Length > 240)
                 {
                     MessageBox.Show("Category name is too long.", "Invalid Name");
                     return;
@@ -87,22 +88,24 @@ namespace CoachDraw
             }
             try
             {
-                Directory.CreateDirectory(Properties.Settings.Default.playDir + @"\" + result);
-                Tuple<string, string> newCategory = new Tuple<string, string>(result, Properties.Settings.Default.playDir + @"\" + result);
+                var dir = $@"{Properties.Settings.Default.playDir}\{result}";
+                Directory.CreateDirectory(dir);
+                var newCategory = new Tuple<string, string>(result, dir);
                 categories.Add(newCategory);
                 lstCategories.SelectedItem = newCategory;
                 LoadPlays(newCategory.Item2);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error creating category:\r\n" + ex.ToString());
+                MessageBox.Show($"Error creating category:\r\n{ex}");
             }
         }
 
         private void btnRenCat_Click(object sender, EventArgs e)
         {
             if (lstCategories.SelectedItem == null) return;
-            string result = Interaction.InputBox("Enter a new category name.\r\nCannot contain the follow characters:\r\n\" , < > | : * ? \\ /", "Rename Category", ((Tuple<string, string>)lstCategories.SelectedItem).Item1);
+            string result = Interaction.InputBox("Enter a new category name.\r\nCannot contain the follow characters:\r\n\" , < > | : * ? \\ /",
+                "Rename Category", ((Tuple<string, string>)lstCategories.SelectedItem).Item1);
             result = Utils.StripInvalid(result).ToUpper();
             if (result == "") return;
             foreach (Tuple<string, string> r in lstCategories.Items)
@@ -112,7 +115,8 @@ namespace CoachDraw
                     MessageBox.Show("Category already exists.", "Invalid Name");
                     return;
                 }
-                else if (Properties.Settings.Default.playDir.Length + result.Length > 240)
+
+                if (Properties.Settings.Default.playDir.Length + result.Length > 240)
                 {
                     MessageBox.Show("Category name is too long.", "Invalid Name");
                     return;
@@ -130,7 +134,7 @@ namespace CoachDraw
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error renaming category:\r\n" + ex);
+                MessageBox.Show($"Error renaming category:\r\n{ex}");
             }
         }
 
@@ -138,7 +142,7 @@ namespace CoachDraw
         {
             if (lstCategories.SelectedItem == null) return;
             Tuple<string, string> current = (Tuple<string, string>)lstCategories.SelectedItem;
-            if (Directory.EnumerateFiles(current.Item2).Count() > 0)
+            if (Directory.EnumerateFiles(current.Item2).Any())
             {
                 MessageBox.Show("Category is not empty!");
                 return;
@@ -151,7 +155,7 @@ namespace CoachDraw
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error deleting category:\r\n" + ex.ToString());
+                MessageBox.Show($"Error deleting category:\r\n{ex}");
             }
         }
 
@@ -167,7 +171,7 @@ namespace CoachDraw
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error renaming play file:\r\n" + ex.ToString());
+                    MessageBox.Show($"Error renaming play file:\r\n{ex}");
                     dgvFiles.CellValueChanged -= dgvFiles_CellValueChanged;
                     dgvFiles.Rows[e.RowIndex].Cells[0].Value = Path.GetFileNameWithoutExtension((string)dgvFiles.Rows[e.RowIndex].Cells[2].Value);
                     dgvFiles.CellValueChanged += dgvFiles_CellValueChanged;
@@ -185,14 +189,15 @@ namespace CoachDraw
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error renaming play:\r\n" + ex);
+                    MessageBox.Show($"Error renaming play:\r\n{ex}");
                 }
             }
         }
 
         private void dgvFiles_UserDeletingRow(object sender, DataGridViewRowCancelEventArgs e)
         {
-            if (MessageBox.Show(String.Format("Are you sure you want to delete this play? This cannot be undone.\r\nFile: {0}\r\nPlay: {1}", e.Row.Cells[0].Value, e.Row.Cells[1].Value), "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
+            if (MessageBox.Show($"Are you sure you want to delete this play? This cannot be undone.\r\nFile: {e.Row.Cells[0].Value}\r\nPlay: {e.Row.Cells[1].Value}",
+                    "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
             {
                 try
                 {
@@ -200,7 +205,7 @@ namespace CoachDraw
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error deleting play:\r\n" + ex);
+                    MessageBox.Show($"Error deleting play:\r\n{ex}");
                 }
             }
             else
@@ -219,12 +224,10 @@ namespace CoachDraw
 
         private void openSelected()
         {
-            if (dgvFiles.SelectedRows.Count > 0)
-            {
-                openPlay = (string)dgvFiles.SelectedRows[0].Cells[2].Value;
-                DialogResult = DialogResult.Yes;
-                Close();
-            }
+            if (dgvFiles.SelectedRows.Count <= 0) return;
+            openPlay = (string)dgvFiles.SelectedRows[0].Cells[2].Value;
+            DialogResult = DialogResult.Yes;
+            Close();
         }
 
         private void dgvFiles_KeyDown(object sender, KeyEventArgs e)
