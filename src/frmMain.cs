@@ -59,8 +59,14 @@ namespace CoachDraw
             LineTypeBox.SelectedIndex = 0;
             EndTypeBox.SelectedIndex = 0;
             PlayerNumBox.Items.Add("None");
-            for (int i = 0; i < 100; i++) PlayerNumBox.Items.Add(i.ToString());
+            for (int i = 0; i < 100; i++)
+                PlayerNumBox.Items.Add(i.ToString());
             PlayerNumBox.SelectedIndex = 0;
+            foreach (var val in Enum.GetNames(typeof(RinkType)))
+                RinkTypeBox.Items.Add(val);
+            RinkTypeBox.SelectedIndex = 0;
+            // Only start monitoring selected type after default value is set to prevent implicit redraw
+            RinkTypeBox.SelectedIndexChanged += RinkTypeBox_SelectedIndexChanged;
             redraw();
             updateTitlebar();
         }
@@ -728,6 +734,13 @@ namespace CoachDraw
             pp.ShowDialog();
             //pd.PrinterSettings = dialog.PrinterSettings;
             //pd.Print();
+        }
+
+        private void RinkTypeBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _currentPlay.RinkType = (RinkType) Enum.Parse(typeof(RinkType), ((ToolStripComboBox) sender).SelectedItem.ToString());
+            _curSpecs = RinkSpecs.GetRink(_currentPlay.RinkType, _requiredScale);
+            redraw();
         }
     }
 

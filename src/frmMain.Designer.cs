@@ -44,6 +44,7 @@
             this.ptToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.pointToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
+            this.RinkTypeBox = new System.Windows.Forms.ToolStripComboBox();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -83,7 +84,8 @@
             this.toolStripSeparator1,
             this.colorLabel,
             this.toolStripSeparator2,
-            this.widthBox});
+            this.widthBox,
+            this.RinkTypeBox});
             this.toolStrip1.Location = new System.Drawing.Point(0, 24);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(1010, 25);
@@ -233,6 +235,15 @@
             this.toolStripMenuItem2.Size = new System.Drawing.Size(94, 22);
             this.toolStripMenuItem2.Text = "4 pt";
             this.toolStripMenuItem2.Click += new System.EventHandler(this.ptToolStripMenuItem_Click);
+            // 
+            // RinkTypeBox
+            // 
+            this.RinkTypeBox.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Append;
+            this.RinkTypeBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
+            this.RinkTypeBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.RinkTypeBox.DropDownWidth = 60;
+            this.RinkTypeBox.Name = "RinkTypeBox";
+            this.RinkTypeBox.Size = new System.Drawing.Size(121, 25);
             // 
             // colorDialog1
             // 
@@ -492,6 +503,7 @@
         private System.Windows.Forms.ToolStripMenuItem printMultiple;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem5;
         private System.Windows.Forms.ToolStripMenuItem selectPrint;
+        private System.Windows.Forms.ToolStripComboBox RinkTypeBox;
     }
 }
 
