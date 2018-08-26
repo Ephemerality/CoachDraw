@@ -11,6 +11,7 @@ namespace CoachDraw
         public string Name { get; set; }
         public string Description { get; set; }
         public List<DrawObj> Objects { get; set; } = new List<DrawObj>();
+        public RinkType RinkType { get; set; } = RinkType.IIHF;
     }
 
     public static class Plays
@@ -36,6 +37,8 @@ namespace CoachDraw
                 if (ValidatePLYXHeader(bw.BaseStream) != 1) return null;
                 result.Name = bw.ReadString();
                 result.Description = bw.ReadString();
+                if (result.Version != 1) // Default was IIHF in version 1
+                    result.RinkType = (RinkType) bw.ReadByte();
                 int numObjs = bw.ReadInt32();
                 for (int i = 0; i < numObjs; i++)
                 {

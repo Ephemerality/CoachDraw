@@ -730,43 +730,132 @@ namespace CoachDraw
         }
     }
 
-    public class RinkSpecs
+    public enum RinkType
+    {
+        IIHF,
+        NHL
+    }
+
+
+    //public abstract double BlueLineFromCenter = 30
+    //public double AuxDotsFromCenter = 22;
+    //public double RedToBlue = 60;
+    //public double EdgeToRed = 12;
+    //public double CenterNetToCircle = 22;
+    //public double RedToCircle = 20;
+    //public double EdgeToCircle = 32;
+    //public double NetWidth = 4;
+    //public double NetLength = 6;
+    //public double NetArcRadius = 8;
+    //public double CircleRadius = 15;
+    //public double DotRadius = 2.5;
+    //public double HashMarkSize = 4;
+
+    public class NHLRink : RinkSpecs
+    {
+        public override double RinkWidth { get; set; } = 200;
+        public override double RinkHeight { get; set; } = 85;
+        public override double BlueLineFromCenter { get; set; } = 25;
+        public override double AuxDotsFromCenter { get; set; } = 20;
+        public override double RedToBlue { get; set; } = 64;
+        public override double EdgeToRed { get; set; } = 12;
+        public override double CenterNetToCircle { get; set; } = 22;
+        //public override double RedToCircle { get; set; } = 20;
+        public override double EdgeToCircle { get; set; } = 32;
+        public override double NetWidth { get; set; } = 4;
+        public override double NetLength { get; set; } = 6;
+        public override double NetArcRadius { get; set; } = 8;
+        public override double CircleRadius { get; set; } = 15;
+        public override double DotRadius { get; set; } = 1;
+        public override double HashMarkSize { get; set; } = 4;
+        public override bool GoalieTrapezoid { get; set; } = true;
+
+        public NHLRink(double newScale) : base(newScale)
+        {
+        }
+    }
+
+    public class IIHFRink : RinkSpecs
+    {
+        public override double RinkWidth { get; set; } = 200;
+        public override double RinkHeight { get; set; } = 100;
+        public override double BlueLineFromCenter { get; set; } = 30;
+        public override double AuxDotsFromCenter { get; set; } = 22;
+        public override double RedToBlue { get; set; } = 60;
+        public override double EdgeToRed { get; set; } = 12;
+        public override double CenterNetToCircle { get; set; } = 22;
+        //public override double RedToCircle { get; set; } = 20;
+        public override double EdgeToCircle { get; set; } = 32;
+        public override double NetWidth { get; set; } = 4;
+        public override double NetLength { get; set; } = 6;
+        public override double NetArcRadius { get; set; } = 8;
+        public override double CircleRadius { get; set; } = 15;
+        public override double DotRadius { get; set; } = 1;
+        public override double HashMarkSize { get; set; } = 4;
+        public override bool GoalieTrapezoid { get; set; } = false;
+
+        public IIHFRink(double newScale) : base(newScale)
+        {
+        }
+    }
+
+    // http://www.nhl.com/nhl/en/v3/ext/rules/2017-2018-NHL-rulebook.pdf
+    // http://www.iihf.com/fileadmin/user_upload/PDF/Sport/IIHF_Official_Rule_Book_2018.pdf
+    public abstract class RinkSpecs
     {
         //Distances in feet
-        public double BlueLineFromCenter = 30;
-        public double AuxDotsFromCenter = 22;
-        public double RedToBlue = 60;
-        public double EdgeToRed = 12;
-        public double CenterNetToCircle = 22;
-        public double RedToCircle = 20;
-        public double EdgeToCircle = 32;
-        public double NetWidth = 4;
-        public double NetLength = 6;
-        public double NetArcRadius = 8;
-        public double CircleRadius = 15;
-        public double DotRadius = 2.5;
-        public double HashMarkSize = 4;
+        public abstract double RinkWidth { get; set; }
+        public abstract double RinkHeight { get; set; }
+        public abstract double BlueLineFromCenter { get; set; }
+        public abstract double AuxDotsFromCenter { get; set; }
+        public abstract double RedToBlue { get; set; }
+        public abstract double EdgeToRed { get; set; }
+        public abstract double CenterNetToCircle { get; set; }
+        //public abstract double RedToCircle { get; set; }
+        public abstract double EdgeToCircle { get; set; }
+        public abstract double NetWidth { get; set; }
+        public abstract double NetLength { get; set; }
+        public abstract double NetArcRadius { get; set; }
+        public abstract double CircleRadius { get; set; }
+        public abstract double DotRadius { get; set; }
+        public abstract double HashMarkSize { get; set; }
+        public abstract bool GoalieTrapezoid { get; set; }
         private double _curScale = 1;
 
-        public RinkSpecs(int newScale)
+        protected RinkSpecs(double newScale)
         {
             SetScale(newScale);
         }
 
-        public void SetScale(int newScale)
+        public void SetScale(double newScale)
         {
+            RinkWidth /= _curScale; RinkWidth *= newScale;
+            RinkHeight /= _curScale; RinkHeight *= newScale;
             BlueLineFromCenter /= _curScale; BlueLineFromCenter *= newScale;
             AuxDotsFromCenter /= _curScale; AuxDotsFromCenter *= newScale;
             RedToBlue /= _curScale; RedToBlue *= newScale;
             EdgeToRed /= _curScale; EdgeToRed *= newScale;
             CenterNetToCircle /= _curScale; CenterNetToCircle *= newScale;
-            RedToCircle /= _curScale; RedToCircle *= newScale;
+            //RedToCircle /= _curScale; RedToCircle *= newScale;
             EdgeToCircle /= _curScale; EdgeToCircle *= newScale;
             NetWidth /= _curScale; NetWidth *= newScale;
             NetLength /= _curScale; NetLength *= newScale;
             NetArcRadius /= _curScale; NetArcRadius *= newScale;
             CircleRadius /= _curScale; CircleRadius *= newScale;
+            DotRadius /= _curScale; DotRadius *= newScale;
             _curScale = newScale;
+        }
+
+        public static RinkSpecs GetRink(RinkType type, double scale)
+        {
+            switch (type)
+            {
+                case RinkType.IIHF:
+                    return new IIHFRink(scale);
+                case RinkType.NHL:
+                    return  new NHLRink(scale);
+            }
+            throw new InvalidEnumArgumentException();
         }
     }
 }
