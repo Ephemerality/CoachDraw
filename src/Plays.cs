@@ -85,7 +85,7 @@ namespace CoachDraw
             }
         }
 
-        public static bool savePLYXFile(string filePath, Play currentPlay, string playName, string playDesc)
+        public static bool SavePlyxFile(string filePath, Play currentPlay, string playName, string playDesc)
         {
             using (var bw = new BinaryWriter(File.Open(filePath, FileMode.Create), Encoding.UTF8))
             {

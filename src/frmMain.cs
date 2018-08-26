@@ -582,7 +582,7 @@ namespace CoachDraw
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (_currentFile == "") return;
-            if (!Plays.savePLYXFile(_currentFile, _currentPlay, txtPlayName.Text, txtPlayDesc.Text)) return;
+            if (!Plays.SavePlyxFile(_currentFile, _currentPlay, txtPlayName.Text, txtPlayDesc.Text)) return;
             _saved = true;
             updateTitlebar();
         }
@@ -613,7 +613,7 @@ namespace CoachDraw
         {
             using (frmSaveAs ld = new frmSaveAs(txtPlayName.Text))
             {
-                if (ld.ShowDialog() == DialogResult.Yes && Plays.savePLYXFile(ld.fileName, _currentPlay, ld.playName, txtPlayDesc.Text))
+                if (ld.ShowDialog() == DialogResult.Yes && Plays.SavePlyxFile(ld.fileName, _currentPlay, ld.playName, txtPlayDesc.Text))
                 {
                     txtPlayName.Text = ld.playName;
                     _saved = true;
