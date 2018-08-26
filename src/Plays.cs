@@ -6,10 +6,11 @@ using System.Text;
 
 namespace CoachDraw
 {
-    public class PlayInfo
+    public class Play
     {
-        public string Name;
-        public string Desc;
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public List<DrawObj> Objects { get; set; } = new List<DrawObj>();
     }
 
     public static class Plays
@@ -27,14 +28,14 @@ namespace CoachDraw
             return BitConverter.ToUInt32(buf, 0);
         }
 
-        public static PlayInfo LoadPLYXFile(string filePath, ref List<DrawObj> objs)
+        public static Play LoadPLYXFile(string filePath)
         {
-            PlayInfo result = new PlayInfo();
+            Play result = new Play();
             using (BinaryReader bw = new BinaryReader(File.OpenRead(filePath), Encoding.UTF8))
             {
                 if (ValidatePLYXHeader(bw.BaseStream) != 1) return null;
                 result.Name = bw.ReadString();
-                result.Desc = bw.ReadString();
+                result.Description = bw.ReadString();
                 int numObjs = bw.ReadInt32();
                 for (int i = 0; i < numObjs; i++)
                 {
@@ -70,7 +71,7 @@ namespace CoachDraw
                         }
                         newObj.objLine.smoothed = bw.ReadBoolean();
                     }
-                    objs.Add(newObj);
+                    result.Objects.Add(newObj);
                 }
                 return result;
             }
@@ -155,9 +156,9 @@ namespace CoachDraw
         }
 
         // TODO: Review
-        public static PlayInfo LoadPLYFile(string filePath, ref List<DrawObj> objs)
+        public static Play LoadPLYFile(string filePath)
         {
-            PlayInfo result = new PlayInfo();
+            Play result = new Play();
             if (!File.Exists(filePath)) return null;
             try
             {
@@ -214,27 +215,27 @@ namespace CoachDraw
                             // Remove bad lines
                             if (!valid || newObj.objLine.points.Count == 2 && Smoothing.GetLineLength(newObj.objLine.points[0], newObj.objLine.points[1]) < 20)
                                 newObj.objLine = null;
-                            objs.Add(newObj);
+                            result.Objects.Add(newObj);
                         }
                         else if (type == 3)
                         {
                             /* 16711680 -1 1 9 855 290
                              * color, label (-1 for none), number of points (always 1), type, X, Y
                              */
-                            var newObj = prevType == 3 ? new DrawObj() : objs[objs.Count - 1];
+                            var newObj = prevType == 3 ? new DrawObj() : result.Objects[result.Objects.Count - 1];
                             newObj.objType = (ItemType)byte.Parse(words[3]);
                             newObj.objLoc = new Point(int.Parse(words[4]), int.Parse(words[5]));
                             newObj.color = ColorTranslator.FromWin32(int.Parse(words[0]));
                             if (!words[1].Equals("-1")) newObj.objLabel = int.Parse(words[1]);
                             else if (newObj.objType == ItemType.PlayerNumber) newObj.objLabel = 0;
-                            if (prevType == 3) objs.Add(newObj);
+                            if (prevType == 3) result.Objects.Add(newObj);
                         }
                         prevType = type;
 
                     }
 
                     // Search and destroy broken, pointless objects (no line, no type, no label, wouldn't really display anything)
-                    objs.RemoveAll(o => o.objLine == null && o.objType == ItemType.None && o.objLabel == -1);
+                    result.Objects.RemoveAll(o => o.objLine == null && o.objType == ItemType.None && o.objLabel == -1);
 
                     file.ReadLine(); // Blank line
                     int skipLines = int.Parse(file.ReadLine()); // Skip "attach" list as it is already guaranteed that legit lines will always have an object attached
@@ -246,7 +247,7 @@ namespace CoachDraw
                     {
                         comment.Append(file.ReadLine().Replace("\"", "") + "\r\n");
                     }
-                    result.Desc = comment.ToString();
+                    result.Description = comment.ToString();
                 }
             }
             catch (Exception e)

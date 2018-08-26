@@ -35,7 +35,7 @@ namespace CoachDraw
         private Bitmap _snapshot;
         private Bitmap _tempDraw;
         private readonly List<Point> _tempcoords;
-        private List<DrawObj> _objs;
+        private Play _currentPlay;
         readonly RinkSpecs curSpecs = new RinkSpecs(5); //Scale
         private string _selectedTool = "Line";
         private string _currentFile = "";
@@ -51,11 +51,11 @@ namespace CoachDraw
             _snapshot = new Bitmap(panel1.ClientRectangle.Width, ClientRectangle.Height);
             _tempDraw = (Bitmap)_snapshot.Clone();
             _tempcoords = new List<Point>();
-            _objs = new List<DrawObj>();
         }
 
         private void frmMain_Load(object sender, EventArgs e)
         {
+            _currentPlay = new Play();
             updateRecentFiles();
             ItemTypeBox.SelectedIndex = 0;
             LineTypeBox.SelectedIndex = 0;
@@ -79,7 +79,7 @@ namespace CoachDraw
         {
             var mn = (ToolStripMenuItem)sender;
             if ((int)mn.Tag == -1) return;
-            _selected = _objs[(int)mn.Tag];
+            _selected = _currentPlay.Objects[(int)mn.Tag];
             redraw();
         }
 
@@ -112,10 +112,10 @@ namespace CoachDraw
             {
 
                 List<int> hits = new List<int>();
-                for (int i = 0; i < _objs.Count; i++)
+                for (int i = 0; i < _currentPlay.Objects.Count; i++)
                 {
-                    if (_objs[i].hitBox != null && _objs[i].hitBox.IsVisible(e.X, e.Y) ||
-                        _objs[i].objLine != null && _objs[i].objLine.hitBox != null && _objs[i].objLine.hitBox.IsVisible(e.X, e.Y))
+                    if (_currentPlay.Objects[i].hitBox != null && _currentPlay.Objects[i].hitBox.IsVisible(e.X, e.Y) ||
+                        _currentPlay.Objects[i].objLine != null && _currentPlay.Objects[i].objLine.hitBox != null && _currentPlay.Objects[i].objLine.hitBox.IsVisible(e.X, e.Y))
                     {
                         hits.Add(i);
                     }
@@ -124,11 +124,11 @@ namespace CoachDraw
                 mn.Closed += deselectObj;
                 if (hits.Count == 1)
                 {
-                    mn.Items.AddRange(buildMenu((int)_objs[hits[0]].objType,
-                        _objs[hits[0]].objLine == null ? -1 : (int)_objs[hits[0]].objLine.lineType,
-                        _objs[hits[0]].objLine == null ? -1 : (int)_objs[hits[0]].objLine.endType));
+                    mn.Items.AddRange(buildMenu((int)_currentPlay.Objects[hits[0]].objType,
+                        _currentPlay.Objects[hits[0]].objLine == null ? -1 : (int)_currentPlay.Objects[hits[0]].objLine.lineType,
+                        _currentPlay.Objects[hits[0]].objLine == null ? -1 : (int)_currentPlay.Objects[hits[0]].objLine.endType));
                     mn.Tag = hits[0];
-                    _selected = _objs[hits[0]];
+                    _selected = _currentPlay.Objects[hits[0]];
                     redraw();
                 }
                 else if (hits.Count > 1)
@@ -137,9 +137,9 @@ namespace CoachDraw
                     foreach (var hit in hits)
                     {
                         var newMn = new ToolStripMenuItem(hit.ToString());
-                        newMn.DropDownItems.AddRange(buildMenu((int)_objs[hit].objType,
-                            _objs[hit].objLine == null ? -1 : (int)_objs[hit].objLine.lineType,
-                            _objs[hit].objLine == null ? -1 : (int)_objs[hit].objLine.endType));
+                        newMn.DropDownItems.AddRange(buildMenu((int)_currentPlay.Objects[hit].objType,
+                            _currentPlay.Objects[hit].objLine == null ? -1 : (int)_currentPlay.Objects[hit].objLine.lineType,
+                            _currentPlay.Objects[hit].objLine == null ? -1 : (int)_currentPlay.Objects[hit].objLine.endType));
                         newMn.Tag = hit;
                         newMn.MouseHover += selectObj;
                         hitsMenu.Add(newMn);
@@ -153,7 +153,7 @@ namespace CoachDraw
             {
                 if (!_mouseDown) return;
                 _mouseDown = false;
-                foreach (DrawObj o in _objs)
+                foreach (DrawObj o in _currentPlay.Objects)
                 {
                     if (o.objLoc.Equals(_startPoint))
                         return;
@@ -193,7 +193,7 @@ namespace CoachDraw
                     newObj.objLine.cleanDuplicates();
                     if (lineLength < 20 || newObj.objLine.points.Count < 2) newObj.objLine = null;
                 }
-                _objs.Add(newObj);
+                _currentPlay.Objects.Add(newObj);
                 _saved = false;
                 updateTitlebar();
             }
@@ -249,19 +249,19 @@ namespace CoachDraw
             switch ((int)mn.OwnerItem.Tag)
             {
                 case 0:
-                    _objs[i].objType = (ItemType)Enum.Parse(typeof(ItemType), mn.Text);
+                    _currentPlay.Objects[i].objType = (ItemType)Enum.Parse(typeof(ItemType), mn.Text);
                     break;
                 case 1:
                     if (mn.Text == "Delete Line")
                     {
                         if (MessageBox.Show("Deleting this line cannot be undone. Are you sure you want to continue?", "Delete Line", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
-                            _objs[i].objLine = null;
+                            _currentPlay.Objects[i].objLine = null;
                     }
                     else
-                        _objs[i].objLine.lineType = (LineType)Enum.Parse(typeof(LineType), mn.Text);
+                        _currentPlay.Objects[i].objLine.lineType = (LineType)Enum.Parse(typeof(LineType), mn.Text);
                     break;
                 case 2:
-                    _objs[i].objLine.endType = (EndType)Enum.Parse(typeof(EndType), mn.Text);
+                    _currentPlay.Objects[i].objLine.endType = (EndType)Enum.Parse(typeof(EndType), mn.Text);
                     break;
             }
             _saved = false;
@@ -274,7 +274,7 @@ namespace CoachDraw
         {
             var mn = (ToolStripMenuItem)sender;
             int i = mn.Owner.GetType() == typeof(ContextMenuStrip) ? (int)mn.Owner.Tag : (int)mn.OwnerItem.Tag;
-            _objs.RemoveAt(i);
+            _currentPlay.Objects.RemoveAt(i);
             _saved = false;
             redraw();
             updateTitlebar();
@@ -326,7 +326,7 @@ namespace CoachDraw
                 g.SmoothingMode = SmoothingMode.HighQuality;
                 drawRink(g);
                 g.SmoothingMode = SmoothingMode.None;
-                foreach (DrawObj o in _objs)
+                foreach (DrawObj o in _currentPlay.Objects)
                 {
                     o.Draw(g, _selected?.Equals(o) ?? false);
                 }
@@ -514,7 +514,7 @@ namespace CoachDraw
             txtPlayDesc.Text = "";
             _currentFile = "";
             _saved = true;
-            _objs.Clear();
+            _currentPlay.Objects.Clear();
             redraw();
             updateTitlebar("Untitled");
         }
@@ -527,14 +527,14 @@ namespace CoachDraw
                 return;
             }
             if (!skipSaveCheck && !checkSaved("opening a new play")) return;
-            _objs.Clear();
+            _currentPlay.Objects.Clear();
             redraw();
-            PlayInfo result = null;
+            Play result = null;
             if (path.ToUpper().EndsWith(".PLY"))
-                result = Plays.LoadPLYFile(path, ref _objs);
+                result = Plays.LoadPLYFile(path);
             else if (path.ToUpper().EndsWith(".PLYX"))
             {
-                result = Plays.LoadPLYXFile(path, ref _objs);
+                result = Plays.LoadPLYXFile(path);
                 _currentFile = path;
                 _saved = true;
             }
@@ -545,7 +545,7 @@ namespace CoachDraw
             else
             {
                 txtPlayName.Text = result.Name;
-                txtPlayDesc.Text = result.Desc;
+                txtPlayDesc.Text = result.Description;
                 addRecentFile(path);
                 redraw();
                 updateTitlebar(Path.GetFileName(path));
@@ -578,7 +578,7 @@ namespace CoachDraw
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (_currentFile == "") return;
-            if (!Plays.savePLYXFile(_currentFile, _objs, txtPlayName.Text, txtPlayDesc.Text, plyxVersion)) return;
+            if (!Plays.savePLYXFile(_currentFile, _currentPlay.Objects, txtPlayName.Text, txtPlayDesc.Text, plyxVersion)) return;
             _saved = true;
             updateTitlebar();
         }
@@ -609,7 +609,7 @@ namespace CoachDraw
         {
             using (frmSaveAs ld = new frmSaveAs(txtPlayName.Text))
             {
-                if (ld.ShowDialog() == DialogResult.Yes && Plays.savePLYXFile(ld.fileName, _objs, ld.playName, txtPlayDesc.Text, plyxVersion))
+                if (ld.ShowDialog() == DialogResult.Yes && Plays.savePLYXFile(ld.fileName, _currentPlay.Objects, ld.playName, txtPlayDesc.Text, plyxVersion))
                 {
                     txtPlayName.Text = ld.playName;
                     _saved = true;
@@ -685,17 +685,16 @@ namespace CoachDraw
                         posy += 250.0f;
                         continue;
                     }
-                    var tempObjs = new List<DrawObj>();
-                    var result = Plays.LoadPLYXFile(play, ref tempObjs);
+                    var result = Plays.LoadPLYXFile(play);
                     var rink = new Bitmap(1000, 500);
                     using (var g = Graphics.FromImage(rink))
                     {
                         g.SmoothingMode = SmoothingMode.HighQuality;
                         drawRink(g);
                         g.SmoothingMode = SmoothingMode.None;
-                        foreach (var o in tempObjs)
+                        foreach (var obj in result.Objects)
                         {
-                            o.Draw(g, false);
+                            obj.Draw(g, false);
                         }
                     }
                     pe.Graphics.DrawLine(new Pen(Color.Black, 1.0f), 0.0f, posy, 1100.0f, posy);
@@ -705,14 +704,14 @@ namespace CoachDraw
                     Font nameFont = ShrinkFont(pe.Graphics, result.Name, new Font("Helvetica", 11.0f, FontStyle.Bold), new Size(750 - newWidth - 10, 100));
                     SizeF nameSize = pe.Graphics.MeasureString(result.Name, nameFont);
                     pe.Graphics.DrawString(result.Name, nameFont, new SolidBrush(Color.Black), 50.0f + newWidth + 10.0f, posy);
-                    Font descFont = ShrinkFont(pe.Graphics, result.Desc, new Font("Helvetica", 8.0f), new Size(750 - newWidth - 10, 240 - (int)nameSize.Height - 5));
-                    pe.Graphics.DrawString(result.Desc, descFont, new SolidBrush(Color.Black), 50.0f + newWidth + 10.0f, posy + nameSize.Height + 5.0f);
+                    Font descFont = ShrinkFont(pe.Graphics, result.Description, new Font("Helvetica", 8.0f), new Size(750 - newWidth - 10, 240 - (int)nameSize.Height - 5));
+                    pe.Graphics.DrawString(result.Description, descFont, new SolidBrush(Color.Black), 50.0f + newWidth + 10.0f, posy + nameSize.Height + 5.0f);
                     posy += 245.0f;
                     pe.Graphics.DrawLine(new Pen(Color.Black, 1.0f), 0.0f, posy, 1100.0f, posy);
                     rink.Dispose();
                 }
                 posy += 25.0f;
-                pe.Graphics.DrawString("CoachDraw © 2017", new Font("Helvetica", 5.0f), new SolidBrush(Color.Black), 50, posy);
+                pe.Graphics.DrawString("CoachDraw © 2018", new Font("Helvetica", 5.0f), new SolidBrush(Color.Black), 50, posy);
             };
             var dialog = new PrintDialog { Document = pd };
             if (dialog.ShowDialog() != DialogResult.OK) return;
