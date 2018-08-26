@@ -358,7 +358,8 @@ namespace CoachDraw
                 centerPen.Dispose();
                 g.DrawLine(redPen, 65, 8, 65, RinkHeight - 8); //Left red line
                 g.DrawLine(redPen, RinkWidth - 66, 8, RinkWidth - 66, RinkHeight - 8); //Right red line
-                                                                                       /**  Nets  **/
+
+                /**  Nets  **/
                 g.DrawLine(blackPen, 65 - 20, (RinkHeight / 2) - 15, 64, (RinkHeight / 2) - 15); //Left top
                 g.DrawLine(blackPen, 65 - 20, (RinkHeight / 2) + 15, 64, (RinkHeight / 2) + 15); //Left bottom
                 g.DrawLine(blackPen, 65 - 20, (RinkHeight / 2) - 15, 65 - 20, (RinkHeight / 2) + 15); //Left side
@@ -368,7 +369,8 @@ namespace CoachDraw
                 g.DrawLine(blackPen, RinkWidth - 65 + 20, (RinkHeight / 2) + 15, RinkWidth - 65, (RinkHeight / 2) + 15); //Right
                 g.DrawLine(blackPen, RinkWidth - 65 + 20, (RinkHeight / 2) - 15, RinkWidth - 65 + 20, (RinkHeight / 2) + 15); //Right
                 g.FillPie(Brushes.PaleTurquoise, RinkWidth - 67 - 40, (RinkHeight / 2) - 40, 80, 80, 90, 180); //Right arc
-                                                                                                               /**  Black border  **/
+
+                /**  Black border  **/
                 g.DrawLine(blackPen, 100, 0, RinkWidth - 100, 0); //Top black line
                 g.DrawLine(blackPen, 1, 100, 1, RinkHeight - 100); //Left black line
                 g.DrawLine(blackPen, RinkWidth - 1, 100, RinkWidth - 1, RinkHeight - 100); //Right black line
@@ -377,7 +379,8 @@ namespace CoachDraw
                 g.DrawArc(blackPen, 0, RinkHeight - 201, 200, 200, 180, -90); //Bottom left curve
                 g.DrawArc(blackPen, RinkWidth - 201, 0, 200, 200, 270, 90); //Top right curve
                 g.DrawArc(blackPen, RinkWidth - 201, RinkHeight - 201, 200, 200, 90, -90); //Bottom right curve
-                                                                                           /**  Dots  **/
+
+                /**  Dots  **/
                 g.FillEllipse(blueBrush, (RinkWidth / 2) - (float)curSpecs.DotRadius, (RinkHeight / 2) - (float)curSpecs.DotRadius, (float)curSpecs.DotRadius * 2, (float)curSpecs.DotRadius * 2); //Center dot
                 g.FillEllipse(redBrush, (float)curSpecs.EdgeToCircle - (float)curSpecs.DotRadius, (RinkHeight / 2) - (float)curSpecs.CenterNetToCircle - (float)curSpecs.DotRadius, (float)curSpecs.DotRadius * 2, (float)curSpecs.DotRadius * 2); //Top left
                 g.FillEllipse(redBrush, RinkWidth - (float)curSpecs.EdgeToCircle - (float)curSpecs.DotRadius, (RinkHeight / 2) - (float)curSpecs.CenterNetToCircle - (float)curSpecs.DotRadius, (float)curSpecs.DotRadius * 2, (float)curSpecs.DotRadius * 2); //Top right circle
