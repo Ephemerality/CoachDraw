@@ -346,8 +346,8 @@ namespace CoachDraw
             using (var blueBrush = new SolidBrush(Color.Blue))
             {
                 /**  Lines  **/
-                g.DrawLine(bluePen, (RinkWidth / 2) - curSpecs.BlueLineFromCenter, 0, (RinkWidth / 2) - curSpecs.BlueLineFromCenter, RinkHeight); //Left blue line
-                g.DrawLine(bluePen, (RinkWidth / 2) + curSpecs.BlueLineFromCenter, 0, (RinkWidth / 2) + curSpecs.BlueLineFromCenter, RinkHeight); //Right blue line
+                g.DrawLine(bluePen, (RinkWidth / 2) - (float)curSpecs.BlueLineFromCenter, 0, (RinkWidth / 2) - (float)curSpecs.BlueLineFromCenter, RinkHeight); //Left blue line
+                g.DrawLine(bluePen, (RinkWidth / 2) + (float)curSpecs.BlueLineFromCenter, 0, (RinkWidth / 2) + (float)curSpecs.BlueLineFromCenter, RinkHeight); //Right blue line
                 Pen centerPen = new Pen(Color.Red, 5)
                 {
                     DashCap = DashCap.Round,
@@ -378,22 +378,22 @@ namespace CoachDraw
                 g.DrawArc(blackPen, RinkWidth - 201, 0, 200, 200, 270, 90); //Top right curve
                 g.DrawArc(blackPen, RinkWidth - 201, RinkHeight - 201, 200, 200, 90, -90); //Bottom right curve
                                                                                            /**  Dots  **/
-                g.FillEllipse(blueBrush, (RinkWidth / 2) - curSpecs.DotRadius, (RinkHeight / 2) - curSpecs.DotRadius, curSpecs.DotRadius * 2, curSpecs.DotRadius * 2); //Center dot
-                g.FillEllipse(redBrush, curSpecs.EdgeToCircle - curSpecs.DotRadius, (RinkHeight / 2) - curSpecs.CenterNetToCircle - curSpecs.DotRadius, curSpecs.DotRadius * 2, curSpecs.DotRadius * 2); //Top left
-                g.FillEllipse(redBrush, RinkWidth - curSpecs.EdgeToCircle - curSpecs.DotRadius, (RinkHeight / 2) - curSpecs.CenterNetToCircle - curSpecs.DotRadius, curSpecs.DotRadius * 2, curSpecs.DotRadius * 2); //Top right circle
-                g.FillEllipse(redBrush, curSpecs.EdgeToCircle - curSpecs.DotRadius, (RinkHeight / 2) + curSpecs.CenterNetToCircle - curSpecs.DotRadius, curSpecs.DotRadius * 2, curSpecs.DotRadius * 2); //Bottom left circle
-                g.FillEllipse(redBrush, RinkWidth - curSpecs.EdgeToCircle - curSpecs.DotRadius, (RinkHeight / 2) + curSpecs.CenterNetToCircle - curSpecs.DotRadius, curSpecs.DotRadius * 2, curSpecs.DotRadius * 2); //Bottom right circle
-                g.FillEllipse(redBrush, (RinkWidth / 2) - curSpecs.AuxDotsFromCenter - curSpecs.DotRadius, (RinkHeight / 2) - curSpecs.CenterNetToCircle - curSpecs.DotRadius, curSpecs.DotRadius * 2, curSpecs.DotRadius * 2);
-                g.FillEllipse(redBrush, (RinkWidth / 2) + curSpecs.AuxDotsFromCenter - curSpecs.DotRadius, (RinkHeight / 2) - curSpecs.CenterNetToCircle - curSpecs.DotRadius, curSpecs.DotRadius * 2, curSpecs.DotRadius * 2);
-                g.FillEllipse(redBrush, (RinkWidth / 2) - curSpecs.AuxDotsFromCenter - curSpecs.DotRadius, (RinkHeight / 2) + curSpecs.CenterNetToCircle - curSpecs.DotRadius, curSpecs.DotRadius * 2, curSpecs.DotRadius * 2);
-                g.FillEllipse(redBrush, (RinkWidth / 2) + curSpecs.AuxDotsFromCenter - curSpecs.DotRadius, (RinkHeight / 2) + curSpecs.CenterNetToCircle - curSpecs.DotRadius, curSpecs.DotRadius * 2, curSpecs.DotRadius * 2);
+                g.FillEllipse(blueBrush, (RinkWidth / 2) - (float)curSpecs.DotRadius, (RinkHeight / 2) - (float)curSpecs.DotRadius, (float)curSpecs.DotRadius * 2, (float)curSpecs.DotRadius * 2); //Center dot
+                g.FillEllipse(redBrush, (float)curSpecs.EdgeToCircle - (float)curSpecs.DotRadius, (RinkHeight / 2) - (float)curSpecs.CenterNetToCircle - (float)curSpecs.DotRadius, (float)curSpecs.DotRadius * 2, (float)curSpecs.DotRadius * 2); //Top left
+                g.FillEllipse(redBrush, RinkWidth - (float)curSpecs.EdgeToCircle - (float)curSpecs.DotRadius, (RinkHeight / 2) - (float)curSpecs.CenterNetToCircle - (float)curSpecs.DotRadius, (float)curSpecs.DotRadius * 2, (float)curSpecs.DotRadius * 2); //Top right circle
+                g.FillEllipse(redBrush, (float)curSpecs.EdgeToCircle - (float)curSpecs.DotRadius, (RinkHeight / 2) + (float)curSpecs.CenterNetToCircle - (float)curSpecs.DotRadius, (float)curSpecs.DotRadius * 2, (float)curSpecs.DotRadius * 2); //Bottom left circle
+                g.FillEllipse(redBrush, RinkWidth - (float)curSpecs.EdgeToCircle - (float)curSpecs.DotRadius, (RinkHeight / 2) + (float)curSpecs.CenterNetToCircle - (float)curSpecs.DotRadius, (float)curSpecs.DotRadius * 2, (float)curSpecs.DotRadius * 2); //Bottom right circle
+                g.FillEllipse(redBrush, (RinkWidth / 2) - (float)curSpecs.AuxDotsFromCenter - (float)curSpecs.DotRadius, (RinkHeight / 2) - (float)curSpecs.CenterNetToCircle - (float)curSpecs.DotRadius, (float)curSpecs.DotRadius * 2, (float)curSpecs.DotRadius * 2);
+                g.FillEllipse(redBrush, (RinkWidth / 2) + (float)curSpecs.AuxDotsFromCenter - (float)curSpecs.DotRadius, (RinkHeight / 2) - (float)curSpecs.CenterNetToCircle - (float)curSpecs.DotRadius, (float)curSpecs.DotRadius * 2, (float)curSpecs.DotRadius * 2);
+                g.FillEllipse(redBrush, (RinkWidth / 2) - (float)curSpecs.AuxDotsFromCenter - (float)curSpecs.DotRadius, (RinkHeight / 2) + (float)curSpecs.CenterNetToCircle - (float)curSpecs.DotRadius, (float)curSpecs.DotRadius * 2, (float)curSpecs.DotRadius * 2);
+                g.FillEllipse(redBrush, (RinkWidth / 2) + (float)curSpecs.AuxDotsFromCenter - (float)curSpecs.DotRadius, (RinkHeight / 2) + (float)curSpecs.CenterNetToCircle - (float)curSpecs.DotRadius, (float)curSpecs.DotRadius * 2, (float)curSpecs.DotRadius * 2);
 
                 /**  Circles  **/
-                g.DrawEllipse(redPen, curSpecs.EdgeToCircle - curSpecs.CircleRadius, (RinkHeight / 2) - curSpecs.CenterNetToCircle - curSpecs.CircleRadius, curSpecs.CircleRadius * 2, curSpecs.CircleRadius * 2); //Top left
-                g.DrawEllipse(redPen, RinkWidth - curSpecs.EdgeToCircle - curSpecs.CircleRadius, (RinkHeight / 2) - curSpecs.CenterNetToCircle - curSpecs.CircleRadius, curSpecs.CircleRadius * 2, curSpecs.CircleRadius * 2); //Top right
-                g.DrawEllipse(redPen, curSpecs.EdgeToCircle - curSpecs.CircleRadius, (RinkHeight / 2) + curSpecs.CenterNetToCircle - curSpecs.CircleRadius, curSpecs.CircleRadius * 2, curSpecs.CircleRadius * 2); //Bottom left
-                g.DrawEllipse(redPen, RinkWidth - curSpecs.EdgeToCircle - curSpecs.CircleRadius, (RinkHeight / 2) + curSpecs.CenterNetToCircle - curSpecs.CircleRadius, curSpecs.CircleRadius * 2, curSpecs.CircleRadius * 2); //Bottom right
-                g.DrawEllipse(bluePen, (RinkWidth / 2) - curSpecs.CircleRadius, (RinkHeight / 2) - curSpecs.CircleRadius, curSpecs.CircleRadius * 2, curSpecs.CircleRadius * 2);
+                g.DrawEllipse(redPen, (float)curSpecs.EdgeToCircle - (float)curSpecs.CircleRadius, (RinkHeight / 2) - (float)curSpecs.CenterNetToCircle - (float)curSpecs.CircleRadius, (float)curSpecs.CircleRadius * 2, (float)curSpecs.CircleRadius * 2); //Top left
+                g.DrawEllipse(redPen, RinkWidth - (float)curSpecs.EdgeToCircle - (float)curSpecs.CircleRadius, (RinkHeight / 2) - (float)curSpecs.CenterNetToCircle - (float)curSpecs.CircleRadius, (float)curSpecs.CircleRadius * 2, (float)curSpecs.CircleRadius * 2); //Top right
+                g.DrawEllipse(redPen, (float)curSpecs.EdgeToCircle - (float)curSpecs.CircleRadius, (RinkHeight / 2) + (float)curSpecs.CenterNetToCircle - (float)curSpecs.CircleRadius, (float)curSpecs.CircleRadius * 2, (float)curSpecs.CircleRadius * 2); //Bottom left
+                g.DrawEllipse(redPen, RinkWidth - (float)curSpecs.EdgeToCircle - (float)curSpecs.CircleRadius, (RinkHeight / 2) + (float)curSpecs.CenterNetToCircle - (float)curSpecs.CircleRadius, (float)curSpecs.CircleRadius * 2, (float)curSpecs.CircleRadius * 2); //Bottom right
+                g.DrawEllipse(bluePen, (RinkWidth / 2) - (float)curSpecs.CircleRadius, (RinkHeight / 2) - (float)curSpecs.CircleRadius, (float)curSpecs.CircleRadius * 2, (float)curSpecs.CircleRadius * 2);
             }
         }
 
@@ -730,20 +730,20 @@ namespace CoachDraw
     public class RinkSpecs
     {
         //Distances in feet
-        public int BlueLineFromCenter = 30;
-        public int AuxDotsFromCenter = 22;
-        public int RedToBlue = 60;
-        public int EdgeToRed = 12;
-        public int CenterNetToCircle = 22;
-        public int RedToCircle = 20;
-        public int EdgeToCircle = 32;
-        public int NetWidth = 4;
-        public int NetLength = 6;
-        public int NetArcRadius = 8;
-        public int CircleRadius = 15;
-        public float DotRadius = 2.5F;
-        public int HashMarkSize = 4;
-        private int _curScale = 1;
+        public double BlueLineFromCenter = 30;
+        public double AuxDotsFromCenter = 22;
+        public double RedToBlue = 60;
+        public double EdgeToRed = 12;
+        public double CenterNetToCircle = 22;
+        public double RedToCircle = 20;
+        public double EdgeToCircle = 32;
+        public double NetWidth = 4;
+        public double NetLength = 6;
+        public double NetArcRadius = 8;
+        public double CircleRadius = 15;
+        public double DotRadius = 2.5;
+        public double HashMarkSize = 4;
+        private double _curScale = 1;
 
         public RinkSpecs(int newScale)
         {
