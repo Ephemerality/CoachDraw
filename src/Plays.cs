@@ -10,12 +10,15 @@ namespace CoachDraw
     {
         public string Name { get; set; }
         public string Description { get; set; }
+        public uint Version { get; set; } = Plays.CurrentPlyxVersion;
         public List<DrawObj> Objects { get; set; } = new List<DrawObj>();
         public RinkType RinkType { get; set; } = RinkType.IIHF;
     }
 
     public static class Plays
     {
+        public const int CurrentPlyxVersion = 2;
+
         // Returns the file version and advances the stream to the data portion.
         public static uint ValidatePLYXHeader(Stream file)
         {
@@ -34,7 +37,9 @@ namespace CoachDraw
             Play result = new Play();
             using (BinaryReader bw = new BinaryReader(File.OpenRead(filePath), Encoding.UTF8))
             {
-                if (ValidatePLYXHeader(bw.BaseStream) != 1) return null;
+                result.Version = ValidatePLYXHeader(bw.BaseStream);
+                if (result.Version < 1 || result.Version > CurrentPlyxVersion)
+                    return null;
                 result.Name = bw.ReadString();
                 result.Description = bw.ReadString();
                 if (result.Version != 1) // Default was IIHF in version 1
@@ -80,16 +85,17 @@ namespace CoachDraw
             }
         }
 
-        public static bool savePLYXFile(string filePath, List<DrawObj> objs, string playName, string playDesc, uint plyxVersion)
+        public static bool savePLYXFile(string filePath, Play currentPlay, string playName, string playDesc)
         {
             using (var bw = new BinaryWriter(File.Open(filePath, FileMode.Create), Encoding.UTF8))
             {
                 bw.Write(new [] { 'P', 'L', 'Y', 'X' });
-                bw.Write(plyxVersion);
+                bw.Write(currentPlay.Version);
                 bw.Write(playName);
                 bw.Write(playDesc);
-                bw.Write(objs.Count);
-                foreach (var obj in objs)
+                bw.Write((byte)currentPlay.RinkType);
+                bw.Write(currentPlay.Objects.Count);
+                foreach (var obj in currentPlay.Objects)
                 {
                     bw.Write((byte)obj.objType);
                     bw.Write(ColorTranslator.ToWin32(obj.color));

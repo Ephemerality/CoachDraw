@@ -36,11 +36,10 @@ namespace CoachDraw
         private Bitmap _tempDraw;
         private readonly List<Point> _tempcoords;
         private Play _currentPlay;
-        readonly RinkSpecs curSpecs = new RinkSpecs(5); //Scale
+        private RinkSpecs _curSpecs = new IIHFRink(_requiredScale); //Scale
         private string _selectedTool = "Line";
         private string _currentFile = "";
         private bool _saved = true;
-        private readonly uint plyxVersion = 1;
         private DrawObj _selected;
         private string _lastSelectedMultiPrint = "";
         private List<string> _lastSetMultiPrint = new List<string> { "", "", "", "" };
@@ -549,6 +548,8 @@ namespace CoachDraw
             {
                 txtPlayName.Text = result.Name;
                 txtPlayDesc.Text = result.Description;
+                _currentPlay = result;
+                _curSpecs = RinkSpecs.GetRink(result.RinkType, _requiredScale);
                 addRecentFile(path);
                 redraw();
                 updateTitlebar(Path.GetFileName(path));
@@ -581,7 +582,7 @@ namespace CoachDraw
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (_currentFile == "") return;
-            if (!Plays.savePLYXFile(_currentFile, _currentPlay.Objects, txtPlayName.Text, txtPlayDesc.Text, plyxVersion)) return;
+            if (!Plays.savePLYXFile(_currentFile, _currentPlay, txtPlayName.Text, txtPlayDesc.Text)) return;
             _saved = true;
             updateTitlebar();
         }
@@ -612,7 +613,7 @@ namespace CoachDraw
         {
             using (frmSaveAs ld = new frmSaveAs(txtPlayName.Text))
             {
-                if (ld.ShowDialog() == DialogResult.Yes && Plays.savePLYXFile(ld.fileName, _currentPlay.Objects, ld.playName, txtPlayDesc.Text, plyxVersion))
+                if (ld.ShowDialog() == DialogResult.Yes && Plays.savePLYXFile(ld.fileName, _currentPlay, ld.playName, txtPlayDesc.Text))
                 {
                     txtPlayName.Text = ld.playName;
                     _saved = true;
