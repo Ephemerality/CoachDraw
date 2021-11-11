@@ -2,7 +2,7 @@
   <PropertyGroup>
     <ProductVersion>8.0.30703</ProductVersion>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>net5.0-windows</TargetFramework>
     <IsWebBootstrapper>true</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
@@ -33,6 +33,7 @@
     <FileVersion>1.0.0.5</FileVersion>
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <PlatformTarget>AnyCPU</PlatformTarget>
+    <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
   <ItemGroup>
     <Compile Update="src\BufferedPanel.cs">
