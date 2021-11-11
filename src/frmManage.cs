@@ -3,17 +3,16 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using Microsoft.VisualBasic;
 using System.Windows.Forms;
 
 namespace CoachDraw
 {
-    public partial class frmManage : Form
+    public partial class FrmManage : Form
     {
-        private readonly BindingList<Tuple<string, string>> categories = new BindingList<Tuple<string, string>>();
-        public string openPlay = "";
+        private readonly BindingList<Tuple<string, string>> _categories = new();
+        public string OpenPlay = "";
 
-        public frmManage()
+        public FrmManage()
         {
             InitializeComponent();
         }
@@ -28,7 +27,7 @@ namespace CoachDraw
                 Properties.Settings.Default.playDir = playPath;
                 Properties.Settings.Default.Save();
             }
-            lstCategories.DataSource = categories;
+            lstCategories.DataSource = _categories;
             lstCategories.DisplayMember = "Item1";
             lstCategories.ValueMember = "Item2";
             LoadCategories(Properties.Settings.Default.playDir);
@@ -37,16 +36,16 @@ namespace CoachDraw
         private void LoadCategories(string dir)
         {
             if (!Directory.Exists(dir)) return;
-            categories.Clear();
+            _categories.Clear();
             lstCategories.SelectedIndexChanged -= lstCategories_SelectedIndexChanged;
             var dirs = new List<string>(Directory.EnumerateDirectories(dir));
             foreach (var category in dirs)
             {
-                categories.Add(new Tuple<string, string>(Path.GetFileName(category), category));
+                _categories.Add(new Tuple<string, string>(Path.GetFileName(category), category));
             }
             lstCategories.SelectedIndexChanged += lstCategories_SelectedIndexChanged;
-            if (categories.Count > 0)
-                LoadPlays(categories[0].Item2);
+            if (_categories.Count > 0)
+                LoadPlays(_categories[0].Item2);
         }
 
         private void LoadPlays(string dir)
@@ -54,10 +53,9 @@ namespace CoachDraw
             dgvFiles.CellValueChanged -= dgvFiles_CellValueChanged;
             dgvFiles.Rows.Clear();
             var files = new List<string>(Directory.EnumerateFiles(dir));
-            foreach (var file in files)
+            foreach (var file in files.Where(file => Path.GetExtension(file)?.ToUpper() == ".PLYX"))
             {
-                if (Path.GetExtension(file)?.ToUpper() != ".PLYX") continue;
-                dgvFiles.Rows.Add(Path.GetFileNameWithoutExtension(file), Plays.GetPLYXName(file), file);
+                dgvFiles.Rows.Add(Path.GetFileNameWithoutExtension(file), Plays.GetPlyxName(file), file);
             }
             dgvFiles.CellValueChanged += dgvFiles_CellValueChanged;
         }
@@ -94,7 +92,7 @@ namespace CoachDraw
                 var dir = $@"{Properties.Settings.Default.playDir}\{result}";
                 Directory.CreateDirectory(dir);
                 var newCategory = new Tuple<string, string>(result, dir);
-                categories.Add(newCategory);
+                _categories.Add(newCategory);
                 lstCategories.SelectedItem = newCategory;
                 LoadPlays(newCategory.Item2);
             }
@@ -132,8 +130,8 @@ namespace CoachDraw
                 var di = new DirectoryInfo(((Tuple<string, string>)lstCategories.SelectedItem).Item2);
                 di.MoveTo(Path.Combine(di.Parent.FullName, result));
                 var newCategory = new Tuple<string, string>(di.Name, di.FullName);
-                categories.Remove((Tuple<string, string>)lstCategories.SelectedItem);
-                categories.Add(newCategory);
+                _categories.Remove((Tuple<string, string>)lstCategories.SelectedItem);
+                _categories.Add(newCategory);
                 lstCategories.SelectedItem = newCategory;
                 LoadPlays(newCategory.Item2);
             }
@@ -155,7 +153,7 @@ namespace CoachDraw
             try
             {
                 Directory.Delete(current.Item2);
-                categories.Remove(current);
+                _categories.Remove(current);
                 LoadPlays(((Tuple<string, string>)lstCategories.SelectedItem).Item2);
             }
             catch (Exception ex)
@@ -186,9 +184,9 @@ namespace CoachDraw
             {
                 try
                 {
-                    if (!Plays.RenamePLYX((string)dgvFiles.Rows[e.RowIndex].Cells[2].Value, (string)dgvFiles.Rows[e.RowIndex].Cells[1].Value))
+                    if (!Plays.RenamePlyx((string)dgvFiles.Rows[e.RowIndex].Cells[2].Value, (string)dgvFiles.Rows[e.RowIndex].Cells[1].Value))
                     {
-                        dgvFiles.Rows[e.RowIndex].Cells[1].Value = Plays.GetPLYXName((string)dgvFiles.Rows[e.RowIndex].Cells[2].Value);
+                        dgvFiles.Rows[e.RowIndex].Cells[1].Value = Plays.GetPlyxName((string)dgvFiles.Rows[e.RowIndex].Cells[2].Value);
                         MessageBox.Show("Renaming play failed, play file is not valid.");
                     }
                 }
@@ -219,18 +217,18 @@ namespace CoachDraw
 
         private void btnOpen_Click(object sender, EventArgs e)
         {
-            openSelected();
+            OpenSelected();
         }
 
         private void dgvFiles_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            openSelected();
+            OpenSelected();
         }
 
-        private void openSelected()
+        private void OpenSelected()
         {
             if (dgvFiles.SelectedRows.Count <= 0) return;
-            openPlay = (string)dgvFiles.SelectedRows[0].Cells[2].Value;
+            OpenPlay = (string)dgvFiles.SelectedRows[0].Cells[2].Value;
             DialogResult = DialogResult.Yes;
             Close();
         }
@@ -240,7 +238,7 @@ namespace CoachDraw
             if (e.KeyData == Keys.F2)
                 dgvFiles.BeginEdit(true);
             else if (e.KeyData == Keys.Enter)
-                openSelected();
+                OpenSelected();
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
+
 // ReSharper disable ArrangeRedundantParentheses
 
 namespace CoachDraw
@@ -9,7 +11,7 @@ namespace CoachDraw
     {
         public static int GetLineLength(Point start, Point end)
         {
-            return (int)Math.Sqrt(Math.Pow(Math.Abs(start.X - end.X), 2) + Math.Pow(Math.Abs(start.Y - end.Y), 2));
+            return (int) Math.Sqrt(Math.Pow(Math.Abs(start.X - end.X), 2) + Math.Pow(Math.Abs(start.Y - end.Y), 2));
         }
 
         public static Point GetMidPoint(int x1, int y1, int x2, int y2)
@@ -30,7 +32,7 @@ namespace CoachDraw
             return new Point((int)(((1 - t) * point1.X) + (t * point2.X)), (int)(((1 - t) * point1.Y) + (t * point2.Y)));
         }
 
-        public static float getAngle(Point point1, Point point2)
+        public static float GetAngle(Point point1, Point point2)
         {
             return (float)(Math.Atan2(point2.Y - point1.Y, point2.X - point1.X) * 180 / Math.PI);
         }
@@ -41,16 +43,23 @@ namespace CoachDraw
             var returnVal = new List<Point>();
             for (var i = 0; i < points.Count - 1; i++)
             {
-                if (count++ % interval == 0) returnVal.Add(points[i]);
+                if (count++ % interval == 0)
+                    returnVal.Add(points[i]);
             }
-            returnVal.Add(points[points.Count - 1]);
+            returnVal.Add(points[^1]);
             return returnVal;
         }
 
         public static List<Point> McMasters(List<Point> points)
         {
-            if (points == null || points.Count < 5) return points;
-            var returnPoints = new List<Point> { points[0], points[1] };
+            if (points == null || points.Count < 5)
+                return points;
+
+            var returnPoints = new List<Point>
+            {
+                points[0],
+                points[1]
+            };
             for (var i = 2; i < points.Count - 2; i++)
             {
                 var x = (points[i - 2].X + points[i - 1].X + points[i].X + points[i + 1].X + points[i + 2].X) / 5.0;
@@ -58,40 +67,37 @@ namespace CoachDraw
                 var midpoint = GetMidPoint(points[i].X, points[i].Y, (int)Math.Round(x, MidpointRounding.AwayFromZero), (int)Math.Round(y, MidpointRounding.AwayFromZero));
                 returnPoints.Add(midpoint);
             }
-            returnPoints.Add(points[points.Count - 2]);
-            returnPoints.Add(points[points.Count - 1]);
+            returnPoints.Add(points[^2]);
+            returnPoints.Add(points[^1]);
             return returnPoints;
         }
 
-
         /*Provided by: http://www.codeproject.com/KB/cs/Douglas-Peucker_Algorithm.aspx */
-        public static List<Point> DouglasPeuckerReduction(List<Point> Points, double Tolerance)
+        public static List<Point> DouglasPeuckerReduction(List<Point> points, double tolerance)
         {
-            if (Points == null || Points.Count < 3)
-                return Points;
+            if (points == null || points.Count < 3)
+                return points;
 
-            var firstPoint = 0;
-            var lastPoint = Points.Count - 1;
+            const int firstPoint = 0;
+            var lastPoint = points.Count - 1;
             //Add the first and last index to the keepers
-            var pointIndexsToKeep = new List<int> { firstPoint, lastPoint };
+            var pointIndexsToKeep = new List<int>
+            {
+                firstPoint,
+                lastPoint
+            };
 
             //The first and the last point cannot be the same
-            while (Points[firstPoint].Equals(Points[lastPoint]))
+            while (points[firstPoint].Equals(points[lastPoint]))
             {
                 lastPoint--;
             }
 
-            DouglasPeuckerReduction(Points, firstPoint, lastPoint,
-            Tolerance, ref pointIndexsToKeep);
+            DouglasPeuckerReduction(points, firstPoint, lastPoint, tolerance, ref pointIndexsToKeep);
 
-            var returnPoints = new List<Point>();
             pointIndexsToKeep.Sort();
-            foreach (var index in pointIndexsToKeep)
-            {
-                returnPoints.Add(Points[index]);
-            }
 
-            return returnPoints;
+            return pointIndexsToKeep.Select(index => points[index]).ToList();
         }
 
         /// <summary>
@@ -102,17 +108,18 @@ namespace CoachDraw
         /// <param name="lastPoint">The last point.</param>
         /// <param name="tolerance">The tolerance.</param>
         /// <param name="pointIndexsToKeep">The point index to keep.</param>
-        private static void DouglasPeuckerReduction(List<Point> points, int firstPoint, int lastPoint, double tolerance, ref List<int> pointIndexsToKeep)
+        private static void DouglasPeuckerReduction(IReadOnlyList<Point> points, int firstPoint, int lastPoint, double tolerance, ref List<int> pointIndexsToKeep)
         {
             while (true)
             {
-                double maxDistance = 0;
+                var maxDistance = 0.0;
                 var indexFarthest = 0;
 
                 for (var index = firstPoint; index < lastPoint; index++)
                 {
                     var distance = PerpendicularDistance(points[firstPoint], points[lastPoint], points[index]);
-                    if (!(distance > maxDistance)) continue;
+                    if (!(distance > maxDistance))
+                        continue;
                     maxDistance = distance;
                     indexFarthest = index;
                 }
@@ -134,17 +141,17 @@ namespace CoachDraw
         /// <summary>
         /// The distance of a point from a line made from point1 and point2.
         /// </summary>
-        public static double PerpendicularDistance (Point Point1, Point Point2, Point Point)
+        public static double PerpendicularDistance (Point point1, Point point2, Point point)
         {
             //Area = |(1/2)(x1y2 + x2y3 + x3y1 - x2y1 - x3y2 - x1y3)|   *Area of triangle
             //Base = v((x1-x2)²+(x1-x2)²)                               *Base of Triangle*
             //Area = .5*Base*H                                          *Solve for height
             //Height = Area/.5/Base
 
-            var area = Math.Abs(.5 * (Point1.X * Point2.Y + Point2.X *
-                Point.Y + Point.X * Point1.Y - Point2.X * Point1.Y - Point.X *
-                Point2.Y - Point1.X * Point.Y));
-            var bottom = Math.Sqrt(Math.Pow(Point1.X - Point2.X, 2) + Math.Pow(Point1.Y - Point2.Y, 2));
+            var area = Math.Abs(.5 * (point1.X * point2.Y + point2.X *
+                point.Y + point.X * point1.Y - point2.X * point1.Y - point.X *
+                point2.Y - point1.X * point.Y));
+            var bottom = Math.Sqrt(Math.Pow(point1.X - point2.X, 2) + Math.Pow(point1.Y - point2.Y, 2));
             var height = area / bottom * 2;
 
             return height;

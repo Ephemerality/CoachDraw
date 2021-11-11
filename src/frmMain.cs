@@ -11,23 +11,25 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
+using CoachDraw.Model;
+using CoachDraw.Rink;
 
 namespace CoachDraw
 {
-    public partial class frmMain : Form
+    public partial class FrmMain : Form
     {
         /** Path compacting from snippet on MSDN **/
         [DllImport("shlwapi.dll")]
-        static extern bool PathCompactPathEx([Out] StringBuilder pszOut, string szPath, int cchMax, int dwFlags);
+        private static extern bool PathCompactPathEx([Out] StringBuilder pszOut, string szPath, int cchMax, int dwFlags);
 
-        static string compactString(string path, int length)
+        private static string CompactString(string path, int length)
         {
             var sb = new StringBuilder(length + 1);
             PathCompactPathEx(sb, path, length + 1, 0);
             return sb.ToString();
         }
         /******************************************/
-        private const double _requiredScale = 5;
+        private const double RequiredScale = 5;
         private Point _startPoint;
         private Point _endPoint;
         private bool _mouseDown;
@@ -35,15 +37,15 @@ namespace CoachDraw
         private Bitmap _tempDraw;
         private readonly List<Point> _tempcoords;
         private Play _currentPlay;
-        private RinkSpecs _curSpecs = new IIHFRink(_requiredScale); //Scale
+        private RinkSpecs _curSpecs = new IihfRink(RequiredScale); //Scale
         private string _selectedTool = "Line";
         private string _currentFile = "";
         private bool _saved = true;
         private DrawObj _selected;
         private string _lastSelectedMultiPrint = "";
-        private List<string> _lastSetMultiPrint = new List<string> { "", "", "", "" };
+        private List<string> _lastSetMultiPrint = new() { "", "", "", "" };
 
-        public frmMain()
+        public FrmMain()
         {
             InitializeComponent();
             _snapshot = new Bitmap(panel1.ClientRectangle.Width, ClientRectangle.Height);
@@ -54,7 +56,7 @@ namespace CoachDraw
         private void frmMain_Load(object sender, EventArgs e)
         {
             _currentPlay = new Play();
-            updateRecentFiles();
+            UpdateRecentFiles();
             ItemTypeBox.SelectedIndex = 0;
             LineTypeBox.SelectedIndex = 0;
             EndTypeBox.SelectedIndex = 0;
@@ -67,30 +69,32 @@ namespace CoachDraw
             RinkTypeBox.SelectedIndex = 0;
             // Only start monitoring selected type after default value is set to prevent implicit redraw
             RinkTypeBox.SelectedIndexChanged += RinkTypeBox_SelectedIndexChanged;
-            redraw();
-            updateTitlebar();
+            Redraw();
+            UpdateTitlebar();
         }
 
-        private void updateTitlebar(string text = "")
+        private void UpdateTitlebar(string text = "")
         {
-            if (_currentFile == "") text = "Untitled";
-            if (text == "") text = Path.GetFileName(_currentFile);
+            if (_currentFile == "")
+                text = "Untitled";
+            if (text == "")
+                text = Path.GetFileName(_currentFile);
             Text = $"{(_saved ? "" : "*")}{text} - Coach Draw v{Application.ProductVersion}";
             saveToolStripMenuItem.Enabled = _currentFile != "";
         }
 
-        void selectObj(object sender, EventArgs e)
+        private void SelectObj(object sender, EventArgs e)
         {
             var mn = (ToolStripMenuItem)sender;
             if ((int)mn.Tag == -1) return;
             _selected = _currentPlay.Objects[(int)mn.Tag];
-            redraw();
+            Redraw();
         }
 
-        void deselectObj(object sender, ToolStripDropDownClosedEventArgs e)
+        private void DeselectObj(object sender, ToolStripDropDownClosedEventArgs e)
         {
             _selected = null;
-            redraw();
+            Redraw();
         }
 
         #region Panel Events
@@ -118,22 +122,22 @@ namespace CoachDraw
                 var hits = new List<int>();
                 for (var i = 0; i < _currentPlay.Objects.Count; i++)
                 {
-                    if (_currentPlay.Objects[i].hitBox != null && _currentPlay.Objects[i].hitBox.IsVisible(e.X, e.Y) ||
-                        _currentPlay.Objects[i].objLine != null && _currentPlay.Objects[i].objLine.hitBox != null && _currentPlay.Objects[i].objLine.hitBox.IsVisible(e.X, e.Y))
+                    if (_currentPlay.Objects[i].HitBox != null && _currentPlay.Objects[i].HitBox.IsVisible(e.X, e.Y) ||
+                        _currentPlay.Objects[i].ObjLine != null && _currentPlay.Objects[i].ObjLine.HitBox != null && _currentPlay.Objects[i].ObjLine.HitBox.IsVisible(e.X, e.Y))
                     {
                         hits.Add(i);
                     }
                 }
                 var mn = new ContextMenuStrip();
-                mn.Closed += deselectObj;
+                mn.Closed += DeselectObj;
                 if (hits.Count == 1)
                 {
-                    mn.Items.AddRange(buildMenu((int)_currentPlay.Objects[hits[0]].objType,
-                        _currentPlay.Objects[hits[0]].objLine == null ? -1 : (int)_currentPlay.Objects[hits[0]].objLine.lineType,
-                        _currentPlay.Objects[hits[0]].objLine == null ? -1 : (int)_currentPlay.Objects[hits[0]].objLine.endType));
+                    mn.Items.AddRange(BuildMenu((int)_currentPlay.Objects[hits[0]].ObjType,
+                        _currentPlay.Objects[hits[0]].ObjLine == null ? -1 : (int)_currentPlay.Objects[hits[0]].ObjLine.LineType,
+                        _currentPlay.Objects[hits[0]].ObjLine == null ? -1 : (int)_currentPlay.Objects[hits[0]].ObjLine.EndType));
                     mn.Tag = hits[0];
                     _selected = _currentPlay.Objects[hits[0]];
-                    redraw();
+                    Redraw();
                 }
                 else if (hits.Count > 1)
                 {
@@ -141,67 +145,65 @@ namespace CoachDraw
                     foreach (var hit in hits)
                     {
                         var newMn = new ToolStripMenuItem(hit.ToString());
-                        newMn.DropDownItems.AddRange(buildMenu((int)_currentPlay.Objects[hit].objType,
-                            _currentPlay.Objects[hit].objLine == null ? -1 : (int)_currentPlay.Objects[hit].objLine.lineType,
-                            _currentPlay.Objects[hit].objLine == null ? -1 : (int)_currentPlay.Objects[hit].objLine.endType));
+                        newMn.DropDownItems.AddRange(BuildMenu((int)_currentPlay.Objects[hit].ObjType,
+                            _currentPlay.Objects[hit].ObjLine == null ? -1 : (int)_currentPlay.Objects[hit].ObjLine.LineType,
+                            _currentPlay.Objects[hit].ObjLine == null ? -1 : (int)_currentPlay.Objects[hit].ObjLine.EndType));
                         newMn.Tag = hit;
-                        newMn.MouseHover += selectObj;
+                        newMn.MouseHover += SelectObj;
                         hitsMenu.Add(newMn);
                     }
                     mn.Items.AddRange(hitsMenu.ToArray<ToolStripItem>());
                     mn.Tag = -1;
                 }
-                if (mn.Items.Count > 0) mn.Show(panel1, new Point(e.X, e.Y));
+                if (mn.Items.Count > 0)
+                    mn.Show(panel1, new Point(e.X, e.Y));
             }
             else if (e.Button == MouseButtons.Left)
             {
                 if (!_mouseDown) return;
                 _mouseDown = false;
-                foreach (var o in _currentPlay.Objects)
-                {
-                    if (o.objLoc.Equals(_startPoint))
-                        return;
-                }
+                if (_currentPlay.Objects.Any(o => o.ObjLoc.Equals(_startPoint)))
+                    return;
                 _endPoint.X = Math.Min(e.X, panel1.Width);
                 _endPoint.Y = Math.Min(e.Y, panel1.Height);
                 var newObj = new DrawObj
                 {
-                    objType = (ItemType)Enum.Parse(typeof(ItemType), ItemTypeBox.Text.Replace(" ", "").Replace(".", "")),
-                    objLoc = _startPoint,
-                    color = colorDialog1.Color,
-                    objLabel = PlayerNumBox.Text == "None" ? -1 : int.Parse(PlayerNumBox.Text)
+                    ObjType = (ItemType)Enum.Parse(typeof(ItemType), ItemTypeBox.Text.Replace(" ", "").Replace(".", "")),
+                    ObjLoc = _startPoint,
+                    Color = colorDialog1.Color,
+                    ObjLabel = PlayerNumBox.Text == "None" ? -1 : int.Parse(PlayerNumBox.Text)
                 };
                 if (!_startPoint.Equals(_endPoint) || _tempcoords.Count > 0)
                 {
-                    newObj.objLine = new Line
+                    newObj.ObjLine = new Line
                     {
-                        lineType = (LineType)Enum.Parse(typeof(LineType), LineTypeBox.Text.Replace(" ", "")),
-                        endType = (EndType)Enum.Parse(typeof(EndType), EndTypeBox.Text.Replace(" ", "")),
-                        color = colorDialog1.Color
+                        LineType = (LineType)Enum.Parse(typeof(LineType), LineTypeBox.Text.Replace(" ", "")),
+                        EndType = (EndType)Enum.Parse(typeof(EndType), EndTypeBox.Text.Replace(" ", "")),
+                        Color = colorDialog1.Color
                     };
-                    foreach (ToolStripMenuItem item in widthBox.DropDownItems)
-                        if (item.Checked) newObj.objLine.lineWidth = byte.Parse(item.Text.Remove(1));
+                    foreach (var item in widthBox.DropDownItems.OfType<ToolStripMenuItem>().Where(item => item.Checked))
+                        newObj.ObjLine.LineWidth = byte.Parse(item.Text.Remove(1));
 
                     var lineLength = 0;
                     if (_selectedTool == "Line")
                     {
                         lineLength = Smoothing.GetLineLength(_startPoint, _endPoint);
-                        newObj.objLine.points.Add(_startPoint);
-                        newObj.objLine.points.Add(_endPoint);
+                        newObj.ObjLine.Points.Add(_startPoint);
+                        newObj.ObjLine.Points.Add(_endPoint);
                     }
                     else if (_selectedTool == "Pencil")
                     {
-                        newObj.objLine.points = _tempcoords.ToList();
-                        lineLength = newObj.objLine.getAggregateLength(0, newObj.objLine.points.Count - 1);
+                        newObj.ObjLine.Points = _tempcoords.ToList();
+                        lineLength = newObj.ObjLine.GetAggregateLength(0, newObj.ObjLine.Points.Count - 1);
                     }
-                    newObj.objLine.cleanDuplicates();
-                    if (lineLength < 20 || newObj.objLine.points.Count < 2) newObj.objLine = null;
+                    newObj.ObjLine.CleanDuplicates();
+                    if (lineLength < 20 || newObj.ObjLine.Points.Count < 2) newObj.ObjLine = null;
                 }
                 _currentPlay.Objects.Add(newObj);
                 _saved = false;
-                updateTitlebar();
+                UpdateTitlebar();
             }
-            redraw();
+            Redraw();
         }
 
         private void panel1_MouseMove(object sender, MouseEventArgs e)
@@ -236,7 +238,7 @@ namespace CoachDraw
         }
         #endregion
 
-        private void clickItemList(object sender, EventArgs e)
+        private void ClickItemList(object sender, EventArgs e)
         {
             var mn = (ToolStripMenuItem)sender;
             var i = -1;
@@ -253,60 +255,60 @@ namespace CoachDraw
             switch ((int)mn.OwnerItem.Tag)
             {
                 case 0:
-                    _currentPlay.Objects[i].objType = (ItemType)Enum.Parse(typeof(ItemType), mn.Text);
+                    _currentPlay.Objects[i].ObjType = (ItemType)Enum.Parse(typeof(ItemType), mn.Text);
                     break;
                 case 1:
                     if (mn.Text == "Delete Line")
                     {
                         if (MessageBox.Show("Deleting this line cannot be undone. Are you sure you want to continue?", "Delete Line", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
-                            _currentPlay.Objects[i].objLine = null;
+                            _currentPlay.Objects[i].ObjLine = null;
                     }
                     else
-                        _currentPlay.Objects[i].objLine.lineType = (LineType)Enum.Parse(typeof(LineType), mn.Text);
+                        _currentPlay.Objects[i].ObjLine.LineType = (LineType)Enum.Parse(typeof(LineType), mn.Text);
                     break;
                 case 2:
-                    _currentPlay.Objects[i].objLine.endType = (EndType)Enum.Parse(typeof(EndType), mn.Text);
+                    _currentPlay.Objects[i].ObjLine.EndType = (EndType)Enum.Parse(typeof(EndType), mn.Text);
                     break;
             }
             _saved = false;
             _selected = null;
-            redraw();
-            updateTitlebar();
+            Redraw();
+            UpdateTitlebar();
         }
 
-        private void deleteItem(object sender, EventArgs e)
+        private void DeleteItem(object sender, EventArgs e)
         {
             var mn = (ToolStripMenuItem)sender;
             var i = mn.Owner.GetType() == typeof(ContextMenuStrip) ? (int)mn.Owner.Tag : (int)mn.OwnerItem.Tag;
             _currentPlay.Objects.RemoveAt(i);
             _saved = false;
-            redraw();
-            updateTitlebar();
+            Redraw();
+            UpdateTitlebar();
         }
 
         // TODO: Review
-        private ToolStripItem[] buildMenu(int it, int lt, int et)
+        private ToolStripItem[] BuildMenu(int it, int lt, int et)
         {
             var itemList = new List<ToolStripItem>();
             var lineList = new List<ToolStripItem>();
             var endList = new List<ToolStripItem>();
             foreach (var itemtype in Enum.GetNames(typeof(ItemType)))
             {
-                var m = new ToolStripMenuItem(itemtype, null, clickItemList);
+                var m = new ToolStripMenuItem(itemtype, null, ClickItemList);
                 if (it != -1 && Enum.GetName(typeof(ItemType), it).Equals(itemtype)) { m.Checked = true; }
                 itemList.Add(m);
             }
-            lineList.Add(new ToolStripMenuItem("Delete Line", null, clickItemList));
+            lineList.Add(new ToolStripMenuItem("Delete Line", null, ClickItemList));
             lineList.Add(new ToolStripSeparator());
             foreach (var linetype in Enum.GetNames(typeof(LineType)))
             {
-                var m = new ToolStripMenuItem(linetype, null, clickItemList);
+                var m = new ToolStripMenuItem(linetype, null, ClickItemList);
                 if (lt != -1 && !m.Checked && Enum.GetName(typeof(LineType), lt).Equals(linetype)) { m.Checked = true; }
                 lineList.Add(m);
             }
             foreach (var endtype in Enum.GetNames(typeof(EndType)))
             {
-                var m = new ToolStripMenuItem(endtype, null, clickItemList);
+                var m = new ToolStripMenuItem(endtype, null, ClickItemList);
                 if (et != -1 && !m.Checked && Enum.GetName(typeof(EndType), et).Equals(endtype)) { m.Checked = true; }
                 endList.Add(m);
             }
@@ -317,18 +319,18 @@ namespace CoachDraw
             mn[2] = new ToolStripMenuItem("End Type", null, endList.ToArray()) { Tag = 2 };
             if (et == -1) mn[2].Enabled = false;
             mn[3] = new ToolStripSeparator();
-            mn[4] = new ToolStripMenuItem("Delete", null, deleteItem);
+            mn[4] = new ToolStripMenuItem("Delete", null, DeleteItem);
             return mn;
         }
 
-        private void redraw()
+        private void Redraw()
         {
             _snapshot.Dispose();
             _snapshot = new Bitmap(panel1.ClientRectangle.Width, panel1.ClientRectangle.Height);
             using (var g = Graphics.FromImage(_snapshot))
             {
                 g.SmoothingMode = SmoothingMode.HighQuality;
-                drawRink(g);
+                DrawRink(g);
                 g.SmoothingMode = SmoothingMode.None;
                 foreach (var o in _currentPlay.Objects)
                 {
@@ -341,7 +343,7 @@ namespace CoachDraw
 
         // TODO: Fix this ugly mess
         [SuppressMessage("ReSharper", "ArrangeRedundantParentheses")]
-        private void drawRink(Graphics g)
+        private void DrawRink(Graphics g)
         {
             using var blackPen = new Pen(Color.Black, 2);
             using var redPen = new Pen(Color.Red, 2);
@@ -472,16 +474,16 @@ namespace CoachDraw
         #endregion
 
         #region Recent Files
-        private void addRecentFile(string path)
+        private void AddRecentFile(string path)
         {
             var sc = Properties.Settings.Default.recentFiles ?? new StringCollection();
             if (sc.Contains(path)) return;
             sc.Add(path);
             if (sc.Count > 5) sc.RemoveAt(0);
-            updateRecentFiles();
+            UpdateRecentFiles();
         }
 
-        private void updateRecentFiles()
+        private void UpdateRecentFiles()
         {
             var sc = Properties.Settings.Default.recentFiles;
             if (sc != null && sc.Count > 0)
@@ -494,7 +496,7 @@ namespace CoachDraw
                         sc.RemoveAt(i--);
                         continue;
                     }
-                    var tempItem = new ToolStripMenuItem(compactString(path, 50), null, clickRecentFile) { Tag = path };
+                    var tempItem = new ToolStripMenuItem(CompactString(path, 50), null, ClickRecentFile) { Tag = path };
                     recentFilesToolStripMenuItem.DropDownItems.Add(tempItem);
                 }
                 Properties.Settings.Default.recentFiles = sc;
@@ -505,42 +507,42 @@ namespace CoachDraw
                 recentFilesToolStripMenuItem.Enabled = false;
         }
 
-        private void clickRecentFile(object sender, EventArgs e)
+        private void ClickRecentFile(object sender, EventArgs e)
         {
             var item = (ToolStripMenuItem)sender;
             if (item.Tag != null)
-                openFile((string)item.Tag, false);
+                OpenFile((string)item.Tag, false);
         }
         #endregion
 
         #region Toolbar/saving/opening stuff
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (!checkSaved("starting a new play")) return;
+            if (!CheckSaved("starting a new play")) return;
             txtPlayName.Text = "";
             txtPlayDesc.Text = "";
             _currentFile = "";
             _saved = true;
             _currentPlay.Objects.Clear();
-            redraw();
-            updateTitlebar("Untitled");
+            Redraw();
+            UpdateTitlebar("Untitled");
         }
 
-        private void openFile(string path, bool skipSaveCheck)
+        private void OpenFile(string path, bool skipSaveCheck)
         {
             if (!File.Exists(path))
             {
                 MessageBox.Show("Sorry, that file no longer exists!", "File Not Found");
                 return;
             }
-            if (!skipSaveCheck && !checkSaved("opening a new play")) return;
-            redraw();
+            if (!skipSaveCheck && !CheckSaved("opening a new play")) return;
+            Redraw();
             Play result = null;
             if (path.ToUpper().EndsWith(".PLY"))
-                result = Plays.LoadPLYFile(path);
+                result = Plays.LoadPlyFile(path);
             else if (path.ToUpper().EndsWith(".PLYX"))
             {
-                result = Plays.LoadPLYXFile(path);
+                result = Plays.LoadPlyxFile(path);
                 _currentFile = path;
                 _saved = true;
             }
@@ -553,26 +555,26 @@ namespace CoachDraw
                 txtPlayName.Text = result.Name;
                 txtPlayDesc.Text = result.Description;
                 _currentPlay = result;
-                _curSpecs = RinkSpecs.GetRink(result.RinkType, _requiredScale);
-                addRecentFile(path);
-                redraw();
-                updateTitlebar(Path.GetFileName(path));
+                _curSpecs = RinkSpecs.GetRink(result.RinkType, RequiredScale);
+                AddRecentFile(path);
+                Redraw();
+                UpdateTitlebar(Path.GetFileName(path));
             }
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (!checkSaved("opening a new play")) return;
+            if (!CheckSaved("opening a new play")) return;
             var dlg = new OpenFileDialog
             {
                 Filter = "All supported files (*.ply, *.plyx)|*.ply;*.plyx|New play files (*.plyx)|*.plyx|HockeyVision play files (*.ply)|*.ply|All files (*.*)|*.*",
                 FilterIndex = 2
             };
             if (dlg.ShowDialog() == DialogResult.OK)
-                openFile(dlg.FileName, true);
+                OpenFile(dlg.FileName, true);
         }
 
-        private bool checkSaved(string operation)
+        private bool CheckSaved(string operation)
         {
             if (_saved) return true;
             var d = MessageBox.Show("The current play is not saved. Do you want to save before " + operation + "?", "Unsaved Play", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button3);
@@ -588,39 +590,39 @@ namespace CoachDraw
             if (_currentFile == "") return;
             if (!Plays.SavePlyxFile(_currentFile, _currentPlay, txtPlayName.Text, txtPlayDesc.Text)) return;
             _saved = true;
-            updateTitlebar();
+            UpdateTitlebar();
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (checkSaved("exiting"))
+            if (CheckSaved("exiting"))
                 Application.Exit();
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (!checkSaved("exiting"))
+            if (!CheckSaved("exiting"))
                 e.Cancel = true;
         }
         #endregion
 
         private void openHVPlayToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            using var ld = new frmManage();
-            if (ld.ShowDialog() == DialogResult.Yes && ld.openPlay != "")
-                openFile(ld.openPlay, false);
+            using var ld = new FrmManage();
+            if (ld.ShowDialog() == DialogResult.Yes && ld.OpenPlay != "")
+                OpenFile(ld.OpenPlay, false);
         }
 
         private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            using var ld = new frmSaveAs(txtPlayName.Text);
-            if (ld.ShowDialog() == DialogResult.Yes && Plays.SavePlyxFile(ld.fileName, _currentPlay, ld.playName, txtPlayDesc.Text))
+            using var ld = new FrmSaveAs(txtPlayName.Text);
+            if (ld.ShowDialog() == DialogResult.Yes && Plays.SavePlyxFile(ld.FileName, _currentPlay, ld.PlayName, txtPlayDesc.Text))
             {
-                txtPlayName.Text = ld.playName;
+                txtPlayName.Text = ld.PlayName;
                 _saved = true;
-                _currentFile = ld.fileName;
-                addRecentFile(ld.fileName);
-                updateTitlebar();
+                _currentFile = ld.FileName;
+                AddRecentFile(ld.FileName);
+                UpdateTitlebar();
             }
         }
 
@@ -667,7 +669,7 @@ namespace CoachDraw
 
         private void printMultiple_Click(object sender, EventArgs e)
         {
-            using var mp = new frmMultiPrint(_currentFile, _lastSelectedMultiPrint, _lastSetMultiPrint);
+            using var mp = new FrmMultiPrint(_currentFile, _lastSelectedMultiPrint, _lastSetMultiPrint);
             if (mp.ShowDialog() == DialogResult.Yes)
                 PrintMultiplePlays(mp.Plays);
             _lastSelectedMultiPrint = mp.LastSelected;
@@ -677,7 +679,7 @@ namespace CoachDraw
         private void PrintMultiplePlays(List<string> plays)
         {
             var pd = new PrintDocument();
-            pd.PrintPage += (printSender, pe) =>
+            pd.PrintPage += (_, pe) =>
             {
                 float posy = 50;
                 foreach (var play in plays)
@@ -687,12 +689,12 @@ namespace CoachDraw
                         posy += 250.0f;
                         continue;
                     }
-                    var result = Plays.LoadPLYXFile(play);
+                    var result = Plays.LoadPlyxFile(play);
                     var rink = new Bitmap(1000, 500);
                     using (var g = Graphics.FromImage(rink))
                     {
                         g.SmoothingMode = SmoothingMode.HighQuality;
-                        drawRink(g);
+                        DrawRink(g);
                         g.SmoothingMode = SmoothingMode.None;
                         foreach (var obj in result.Objects)
                         {
@@ -731,137 +733,8 @@ namespace CoachDraw
         private void RinkTypeBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             _currentPlay.RinkType = (RinkType) Enum.Parse(typeof(RinkType), ((ToolStripComboBox) sender).SelectedItem.ToString());
-            _curSpecs = RinkSpecs.GetRink(_currentPlay.RinkType, _requiredScale);
-            redraw();
-        }
-    }
-
-    public enum RinkType
-    {
-        IIHF,
-        NHL
-    }
-
-
-    //public abstract double BlueLineFromCenter = 30
-    //public double AuxDotsFromCenter = 22;
-    //public double RedToBlue = 60;
-    //public double EdgeToRed = 12;
-    //public double CenterNetToCircle = 22;
-    //public double RedToCircle = 20;
-    //public double EdgeToCircle = 32;
-    //public double NetWidth = 4;
-    //public double NetLength = 6;
-    //public double NetArcRadius = 8;
-    //public double CircleRadius = 15;
-    //public double DotRadius = 2.5;
-    //public double HashMarkSize = 4;
-
-    public class NHLRink : RinkSpecs
-    {
-        public override double RinkWidth { get; set; } = 200;
-        public override double RinkHeight { get; set; } = 85;
-        public override double BlueLineFromCenter { get; set; } = 25;
-        public override double AuxDotsFromCenter { get; set; } = 20;
-        public override double RedToBlue { get; set; } = 64;
-        public override double EdgeToRed { get; set; } = 12;
-        public override double CenterNetToCircle { get; set; } = 22;
-        //public override double RedToCircle { get; set; } = 20;
-        public override double EdgeToCircle { get; set; } = 32;
-        public override double NetWidth { get; set; } = 4;
-        public override double NetLength { get; set; } = 6;
-        public override double NetArcRadius { get; set; } = 8;
-        public override double CircleRadius { get; set; } = 15;
-        public override double DotRadius { get; set; } = 1;
-        public override double HashMarkSize { get; set; } = 4;
-        public override bool GoalieTrapezoid { get; set; } = true;
-
-        public NHLRink(double newScale) : base(newScale)
-        {
-        }
-    }
-
-    public class IIHFRink : RinkSpecs
-    {
-        public override double RinkWidth { get; set; } = 200;
-        public override double RinkHeight { get; set; } = 100;
-        public override double BlueLineFromCenter { get; set; } = 30;
-        public override double AuxDotsFromCenter { get; set; } = 22;
-        public override double RedToBlue { get; set; } = 60;
-        public override double EdgeToRed { get; set; } = 12;
-        public override double CenterNetToCircle { get; set; } = 22;
-        //public override double RedToCircle { get; set; } = 20;
-        public override double EdgeToCircle { get; set; } = 32;
-        public override double NetWidth { get; set; } = 4;
-        public override double NetLength { get; set; } = 6;
-        public override double NetArcRadius { get; set; } = 8;
-        public override double CircleRadius { get; set; } = 15;
-        public override double DotRadius { get; set; } = 1;
-        public override double HashMarkSize { get; set; } = 4;
-        public override bool GoalieTrapezoid { get; set; } = false;
-
-        public IIHFRink(double newScale) : base(newScale)
-        {
-        }
-    }
-
-    // http://www.nhl.com/nhl/en/v3/ext/rules/2017-2018-NHL-rulebook.pdf
-    // http://www.iihf.com/fileadmin/user_upload/PDF/Sport/IIHF_Official_Rule_Book_2018.pdf
-    public abstract class RinkSpecs
-    {
-        //Distances in feet
-        public abstract double RinkWidth { get; set; }
-        public abstract double RinkHeight { get; set; }
-        public abstract double BlueLineFromCenter { get; set; }
-        public abstract double AuxDotsFromCenter { get; set; }
-        public abstract double RedToBlue { get; set; }
-        public abstract double EdgeToRed { get; set; }
-        public abstract double CenterNetToCircle { get; set; }
-        //public abstract double RedToCircle { get; set; }
-        public abstract double EdgeToCircle { get; set; }
-        public abstract double NetWidth { get; set; }
-        public abstract double NetLength { get; set; }
-        public abstract double NetArcRadius { get; set; }
-        public abstract double CircleRadius { get; set; }
-        public abstract double DotRadius { get; set; }
-        public abstract double HashMarkSize { get; set; }
-        public abstract bool GoalieTrapezoid { get; set; }
-        private double _curScale = 1;
-
-        protected RinkSpecs(double newScale)
-        {
-            SetScale(newScale);
-        }
-
-        public void SetScale(double newScale)
-        {
-            RinkWidth /= _curScale; RinkWidth *= newScale;
-            RinkHeight /= _curScale; RinkHeight *= newScale;
-            BlueLineFromCenter /= _curScale; BlueLineFromCenter *= newScale;
-            AuxDotsFromCenter /= _curScale; AuxDotsFromCenter *= newScale;
-            RedToBlue /= _curScale; RedToBlue *= newScale;
-            EdgeToRed /= _curScale; EdgeToRed *= newScale;
-            CenterNetToCircle /= _curScale; CenterNetToCircle *= newScale;
-            //RedToCircle /= _curScale; RedToCircle *= newScale;
-            EdgeToCircle /= _curScale; EdgeToCircle *= newScale;
-            NetWidth /= _curScale; NetWidth *= newScale;
-            NetLength /= _curScale; NetLength *= newScale;
-            NetArcRadius /= _curScale; NetArcRadius *= newScale;
-            CircleRadius /= _curScale; CircleRadius *= newScale;
-            DotRadius /= _curScale; DotRadius *= newScale;
-            _curScale = newScale;
-        }
-
-        public static RinkSpecs GetRink(RinkType type, double scale)
-        {
-            switch (type)
-            {
-                case RinkType.IIHF:
-                    return new IIHFRink(scale);
-                case RinkType.NHL:
-                    return  new NHLRink(scale);
-            }
-            throw new InvalidEnumArgumentException();
+            _curSpecs = RinkSpecs.GetRink(_currentPlay.RinkType, RequiredScale);
+            Redraw();
         }
     }
 }

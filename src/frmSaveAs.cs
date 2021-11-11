@@ -8,13 +8,13 @@ using System.Windows.Forms;
 
 namespace CoachDraw
 {
-    public partial class frmSaveAs : Form
+    public partial class FrmSaveAs : Form
     {
-        private readonly BindingList<Tuple<string, string>> _categories = new BindingList<Tuple<string, string>>();
-        public string playName = "";
-        public string fileName = "";
+        private readonly BindingList<Tuple<string, string>> _categories = new();
+        public string PlayName = "";
+        public string FileName = "";
 
-        public frmSaveAs(string playName)
+        public FrmSaveAs(string playName)
         {
             InitializeComponent();
             txtPlayName.Text = playName;
@@ -122,11 +122,11 @@ namespace CoachDraw
                 MessageBox.Show("Play and file names can't be blank!", "Error");
                 return;
             }
-            playName = txtPlayName.Text.Trim();
-            fileName = Path.Combine(_categories[lstCategories.SelectedIndex].Item2, txtFilename.Text.Trim().ToUpper());
-            if (Path.GetExtension(fileName).ToUpper() != ".PLYX")
-                fileName += ".PLYX";
-            if (File.Exists(fileName))
+            PlayName = txtPlayName.Text.Trim();
+            FileName = Path.Combine(_categories[lstCategories.SelectedIndex].Item2, txtFilename.Text.Trim().ToUpper());
+            if (Path.GetExtension(FileName).ToUpper() != ".PLYX")
+                FileName += ".PLYX";
+            if (File.Exists(FileName))
             {
                 if (DialogResult.No == MessageBox.Show("File already exists. Are you sure you want to overwrite it?\r\nThis cannot be undone.", "File Exists", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2))
                     return;

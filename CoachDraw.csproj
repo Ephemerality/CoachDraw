@@ -3,6 +3,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net5.0-windows</TargetFramework>
+    <LangVersion>latest</LangVersion>
     <IsWebBootstrapper>true</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>

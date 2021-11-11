@@ -1,6 +1,6 @@
 ﻿namespace CoachDraw
 {
-    partial class frmMultiPrint
+    partial class FrmMultiPrint
     {
         /// <summary>
         /// Required designer variable.
@@ -263,7 +263,7 @@
             this.ClientSize = new System.Drawing.Size(554, 343);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
-            this.Name = "frmMultiPrint";
+            this.Name = "FrmMultiPrint";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Multiprint";
             this.panel1.ResumeLayout(false);

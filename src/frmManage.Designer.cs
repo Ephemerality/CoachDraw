@@ -1,6 +1,6 @@
 ﻿namespace CoachDraw
 {
-    partial class frmManage
+    partial class FrmManage
     {
         /// <summary>
         /// Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmManage));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmManage));
             this.dgvFiles = new System.Windows.Forms.DataGridView();
             this.Filename = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.PlayName = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -173,7 +173,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "frmManage";
+            this.Name = "FrmManage";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Play Manager";
             this.Load += new System.EventHandler(this.frmManage_Load);

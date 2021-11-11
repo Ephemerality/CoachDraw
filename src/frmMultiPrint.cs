@@ -7,14 +7,14 @@ using System.Windows.Forms;
 
 namespace CoachDraw
 {
-    public partial class frmMultiPrint : Form
+    public partial class FrmMultiPrint : Form
     {
-        private readonly BindingList<Tuple<string, string>> _categories = new BindingList<Tuple<string, string>>();
+        private readonly BindingList<Tuple<string, string>> _categories = new();
         public List<string> Plays;
         public string LastSelected = "";
         private readonly Control[] _txtPlay;
 
-        public frmMultiPrint(string currentPlay, string lastPlay, List<string> setPlays)
+        public FrmMultiPrint(string currentPlay, string lastPlay, List<string> setPlays)
         {
             InitializeComponent();
             _txtPlay = new Control[] { txtPlay0, txtPlay1, txtPlay2, txtPlay3 };
@@ -36,7 +36,7 @@ namespace CoachDraw
                 SelectPlay(lastPlay);
             for (var i = 0; i < setPlays.Count; i++)
             {
-                _txtPlay[i].Text = CoachDraw.Plays.GetPLYXName(setPlays[i]);
+                _txtPlay[i].Text = CoachDraw.Plays.GetPlyxName(setPlays[i]);
                 _txtPlay[i].Tag = setPlays[0];
             }
         }
@@ -76,10 +76,9 @@ namespace CoachDraw
         {
             dgvFiles.Rows.Clear();
             var files = new List<string>(Directory.EnumerateFiles(dir));
-            foreach (var file in files)
+            foreach (var file in files.Where(file => Path.GetExtension(file)?.ToUpper() == ".PLYX"))
             {
-                if (Path.GetExtension(file)?.ToUpper() != ".PLYX") continue;
-                dgvFiles.Rows.Add(Path.GetFileNameWithoutExtension(file), CoachDraw.Plays.GetPLYXName(file), file);
+                dgvFiles.Rows.Add(Path.GetFileNameWithoutExtension(file), CoachDraw.Plays.GetPlyxName(file), file);
             }
         }
 
@@ -105,7 +104,13 @@ namespace CoachDraw
 
         private void btnPrint_Click(object sender, EventArgs e)
         {
-            Plays = new List<string> { (string)txtPlay0.Tag, (string)txtPlay1.Tag, (string)txtPlay2.Tag, (string)txtPlay3.Tag };
+            Plays = new List<string>
+            {
+                (string) txtPlay0.Tag,
+                (string) txtPlay1.Tag,
+                (string) txtPlay2.Tag,
+                (string) txtPlay3.Tag
+            };
             if (Plays.All(r => r == null))
             {
                 MessageBox.Show("Must have at least 1 play set to print!", "No Plays Selected");

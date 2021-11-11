@@ -1,6 +1,6 @@
 ﻿namespace CoachDraw
 {
-    partial class frmSaveAs
+    partial class FrmSaveAs
     {
         /// <summary>
         /// Required designer variable.
@@ -154,7 +154,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "frmSaveAs";
+            this.Name = "FrmSaveAs";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Save As";
             this.Load += new System.EventHandler(this.frmSaveAs_Load);
