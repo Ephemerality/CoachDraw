@@ -69,9 +69,12 @@ namespace CoachDraw
 
         private void btnNewCat_Click(object sender, EventArgs e)
         {
-            string result = Interaction.InputBox("Enter a category name.\r\nCannot contain the follow characters:\r\n\" , < > | : * ? \\ /", "New Category");
+            if (DialogResult.Cancel == this.InputBox("Enter a category name.\r\nCannot contain the follow characters:\r\n\" , < > | : * ? \\ /", "New Category", out var result))
+                return;
+
             result = Utils.StripInvalid(result).ToUpper();
-            if (result == "") return;
+            if (string.IsNullOrEmpty(result))
+                return;
             foreach (Tuple<string, string> r in lstCategories.Items)
             {
                 if (r.Item1 == result)
@@ -104,10 +107,12 @@ namespace CoachDraw
         private void btnRenCat_Click(object sender, EventArgs e)
         {
             if (lstCategories.SelectedItem == null) return;
-            string result = Interaction.InputBox("Enter a new category name.\r\nCannot contain the follow characters:\r\n\" , < > | : * ? \\ /",
-                "Rename Category", ((Tuple<string, string>)lstCategories.SelectedItem).Item1);
+            if (DialogResult.Cancel != this.InputBox("Enter a new category name.\r\nCannot contain the follow characters:\r\n\" , < > | : * ? \\ /",
+                    "Rename Category", out var result, ((Tuple<string, string>)lstCategories.SelectedItem).Item1))
+                return;
             result = Utils.StripInvalid(result).ToUpper();
-            if (result == "") return;
+            if (string.IsNullOrEmpty(result))
+                return;
             foreach (Tuple<string, string> r in lstCategories.Items)
             {
                 if (r.Item1 == result)

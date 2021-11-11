@@ -22,9 +22,12 @@ namespace CoachDraw
 
         private void btnNewCat_Click(object sender, EventArgs e)
         {
-            string result = Interaction.InputBox("Enter a category name.\r\nCannot contain the follow characters:\r\n\" , < > | : * ? \\ /", "New Category");
+            if (DialogResult.Cancel == this.InputBox("Enter a category name.\r\nCannot contain the follow characters:\r\n\" , < > | : * ? \\ /", "New Category", out var result))
+                return;
+
             result = Utils.StripInvalid(result).ToUpper();
-            if (result == "") return;
+            if (string.IsNullOrEmpty(result))
+                return;
             foreach (Tuple<string, string> r in lstCategories.Items)
             {
                 if (r.Item1 == result)
