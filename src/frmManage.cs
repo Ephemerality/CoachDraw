@@ -72,7 +72,7 @@ namespace CoachDraw
             if (DialogResult.Cancel == this.InputBox("Enter a category name.\r\nCannot contain the follow characters:\r\n\" , < > | : * ? \\ /", "New Category", out var result))
                 return;
 
-            result = Utils.StripInvalid(result).ToUpper();
+            result = result.StripInvalid().ToUpper();
             if (string.IsNullOrEmpty(result))
                 return;
             foreach (Tuple<string, string> r in lstCategories.Items)
@@ -110,7 +110,7 @@ namespace CoachDraw
             if (DialogResult.Cancel != this.InputBox("Enter a new category name.\r\nCannot contain the follow characters:\r\n\" , < > | : * ? \\ /",
                     "Rename Category", out var result, ((Tuple<string, string>)lstCategories.SelectedItem).Item1))
                 return;
-            result = Utils.StripInvalid(result).ToUpper();
+            result = result.StripInvalid().ToUpper();
             if (string.IsNullOrEmpty(result))
                 return;
             foreach (Tuple<string, string> r in lstCategories.Items)
