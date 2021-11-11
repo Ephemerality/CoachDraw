@@ -1,7 +1,7 @@
-﻿using System.Linq;
-using System.IO;
+﻿using System.IO;
+using System.Linq;
 
-namespace CoachDraw
+namespace CoachDraw.Extensions
 {
     internal static class StringExtensions
     {

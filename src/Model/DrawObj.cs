@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Drawing;
+using CoachDraw.Extensions;
 
 namespace CoachDraw.Model
 {
@@ -17,14 +18,9 @@ namespace CoachDraw.Model
             HitBox = new Region(box);
         }
 
-        private Color InvertColor(Color c)
-        {
-            return Color.FromArgb(255 - c.R, 255 - c.G, 255 - c.B);
-        }
-
         public void Draw(Graphics g, bool selected)
         {
-            var myPen = selected ? new Pen(InvertColor(Color), 1) : new Pen(Color, 1);
+            var myPen = selected ? new Pen(Color.Invert(), 1) : new Pen(Color, 1);
             var drawString = "";
             var fontSize = 12;
             var lineSkip = new Rectangle();

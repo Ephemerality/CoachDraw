@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.VisualBasic;
 using System.Windows.Forms;
+using CoachDraw.Extensions;
 
 namespace CoachDraw
 {
