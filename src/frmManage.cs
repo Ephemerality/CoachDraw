@@ -22,7 +22,7 @@ namespace CoachDraw
         {
             if (Properties.Settings.Default.playDir == "")
             {
-                string playPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "CoachDraw");
+                var playPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "CoachDraw");
                 if (!Directory.Exists(playPath))
                     Directory.CreateDirectory(playPath);
                 Properties.Settings.Default.playDir = playPath;
@@ -39,8 +39,8 @@ namespace CoachDraw
             if (!Directory.Exists(dir)) return;
             categories.Clear();
             lstCategories.SelectedIndexChanged -= lstCategories_SelectedIndexChanged;
-            List<string> dirs = new List<string>(Directory.EnumerateDirectories(dir));
-            foreach (string category in dirs)
+            var dirs = new List<string>(Directory.EnumerateDirectories(dir));
+            foreach (var category in dirs)
             {
                 categories.Add(new Tuple<string, string>(Path.GetFileName(category), category));
             }
@@ -53,8 +53,8 @@ namespace CoachDraw
         {
             dgvFiles.CellValueChanged -= dgvFiles_CellValueChanged;
             dgvFiles.Rows.Clear();
-            List<string> files = new List<string>(Directory.EnumerateFiles(dir));
-            foreach (string file in files)
+            var files = new List<string>(Directory.EnumerateFiles(dir));
+            foreach (var file in files)
             {
                 if (Path.GetExtension(file)?.ToUpper() != ".PLYX") continue;
                 dgvFiles.Rows.Add(Path.GetFileNameWithoutExtension(file), Plays.GetPLYXName(file), file);
@@ -124,9 +124,9 @@ namespace CoachDraw
             }
             try
             {
-                DirectoryInfo di = new DirectoryInfo(((Tuple<string, string>)lstCategories.SelectedItem).Item2);
+                var di = new DirectoryInfo(((Tuple<string, string>)lstCategories.SelectedItem).Item2);
                 di.MoveTo(Path.Combine(di.Parent.FullName, result));
-                Tuple<string, string> newCategory = new Tuple<string, string>(di.Name, di.FullName);
+                var newCategory = new Tuple<string, string>(di.Name, di.FullName);
                 categories.Remove((Tuple<string, string>)lstCategories.SelectedItem);
                 categories.Add(newCategory);
                 lstCategories.SelectedItem = newCategory;
@@ -141,7 +141,7 @@ namespace CoachDraw
         private void btnDelCat_Click(object sender, EventArgs e)
         {
             if (lstCategories.SelectedItem == null) return;
-            Tuple<string, string> current = (Tuple<string, string>)lstCategories.SelectedItem;
+            var current = (Tuple<string, string>)lstCategories.SelectedItem;
             if (Directory.EnumerateFiles(current.Item2).Any())
             {
                 MessageBox.Show("Category is not empty!");
@@ -165,7 +165,7 @@ namespace CoachDraw
             {
                 try
                 {
-                    FileInfo fi = new FileInfo((string)dgvFiles.Rows[e.RowIndex].Cells[2].Value);
+                    var fi = new FileInfo((string)dgvFiles.Rows[e.RowIndex].Cells[2].Value);
                     fi.MoveTo(Path.Combine(fi.DirectoryName, (string)dgvFiles.Rows[e.RowIndex].Cells[0].Value + fi.Extension));
                     dgvFiles.Rows[e.RowIndex].Cells[2].Value = fi.FullName;
                 }

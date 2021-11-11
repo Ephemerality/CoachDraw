@@ -62,10 +62,10 @@ namespace CoachDraw
 
         public void Draw(Graphics g, bool selected)
         {
-            Pen myPen = selected ? new Pen(invertColor(color), 1) : new Pen(color, 1);
-            string drawString = "";
-            int fontSize = 12;
-            Rectangle lineSkip = new Rectangle();
+            var myPen = selected ? new Pen(invertColor(color), 1) : new Pen(color, 1);
+            var drawString = "";
+            var fontSize = 12;
+            var lineSkip = new Rectangle();
             switch (objType)
             {
                 case ItemType.Offensive: drawString = "O"; break;
@@ -107,9 +107,9 @@ namespace CoachDraw
             if (objLabel >= 0) drawString += objLabel;
             if (drawString != "")
             {
-                SizeF fSize = g.MeasureString(drawString, new Font("MS Sans Serif", fontSize));
-                int x = objLoc.X - (int)(fSize.Width / 2);
-                int y = objLoc.Y - (int)(fSize.Height / 2);
+                var fSize = g.MeasureString(drawString, new Font("MS Sans Serif", fontSize));
+                var x = objLoc.X - (int)(fSize.Width / 2);
+                var y = objLoc.Y - (int)(fSize.Height / 2);
                 lineSkip = new Rectangle(x, y, (int)fSize.Width, (int)fSize.Height);
                 setHitBox(lineSkip);
                 g.DrawString(drawString, new Font("MS Sans Serif", fontSize), new SolidBrush(myPen.Color), x, y);
@@ -139,7 +139,7 @@ namespace CoachDraw
 
         private void setHitBox()
         {
-            GraphicsPath gp = new GraphicsPath();
+            var gp = new GraphicsPath();
             gp.AddLines(points.ToArray());
             gp.Widen(new Pen(Color.Black, 10));
             hitBox = new Region(gp);
@@ -147,15 +147,15 @@ namespace CoachDraw
 
         public int getAggregateLength(int start, int end)
         {
-            int returnVal = 0;
-            for (int i = start; i < end; i++)
+            var returnVal = 0;
+            for (var i = start; i < end; i++)
                 returnVal += Smoothing.GetLineLength(points[i], points[i + 1]);
             return returnVal;
         }
 
         public void cleanDuplicates()
         {
-            for (int i = 1; i < points.Count; i++)
+            for (var i = 1; i < points.Count; i++)
             {
                 if (points[i].X == points[i - 1].X && points[i].Y == points[i - 1].Y)
                     points.RemoveAt(i--);
@@ -165,8 +165,8 @@ namespace CoachDraw
         [SuppressMessage("ReSharper", "ArrangeRedundantParentheses")]
         public bool draw(Graphics g, bool selected, Rectangle skipBox)
         {
-            Pen myPen = selected ? new Pen(Color.FromArgb(255 - color.R, 255 - color.G, 255 - color.B), lineWidth) : new Pen(color, lineWidth);
-            Pen cappedPen = (Pen)myPen.Clone();
+            var myPen = selected ? new Pen(Color.FromArgb(255 - color.R, 255 - color.G, 255 - color.B), lineWidth) : new Pen(color, lineWidth);
+            var cappedPen = (Pen)myPen.Clone();
             if (!smoothed && lineType != LineType.Lateral && points.Count >= 20)
             {
                 //points = Smoothing.DouglasPeuckerReduction(points, 20.0);
@@ -177,14 +177,14 @@ namespace CoachDraw
             if (getAggregateLength(0, points.Count - 1) < 5) return false; // Line doesn't actually seem to go anywhere. return false so that sucker can be removed!
             setHitBox();
 
-            GraphicsPath end_path = new GraphicsPath();
+            var end_path = new GraphicsPath();
             switch (endType)
             {
                 case EndType.Arrow:
                 case EndType.WideArrow:
-                    int neww = endType == EndType.WideArrow ? 14 : 7;
-                    double newx = neww * Math.Cos(Math.PI / 3);
-                    double newy = neww * Math.Sin(Math.PI / 3);
+                    var neww = endType == EndType.WideArrow ? 14 : 7;
+                    var newx = neww * Math.Cos(Math.PI / 3);
+                    var newy = neww * Math.Sin(Math.PI / 3);
                     end_path.AddLine(0, 0, (float)newx * -1, (float)newy * -1);
                     end_path.AddLine(0, 0, (float)newx, (float)newy * -1);
                     break;
@@ -206,13 +206,13 @@ namespace CoachDraw
                         g.DrawCurve(cappedPen, points.ToArray(), 0, points.Count - 1, 0.5F);
                     break;
                 case LineType.Shot:
-                    Point origin = points[points.Count - 1];
-                    Point first = points[0];
-                    int r = 8;
-                    double a2 = Math.Atan2(first.Y - origin.Y, first.X - origin.X);
-                    using (Pen newPen = new Pen(color, lineWidth))
+                    var origin = points[points.Count - 1];
+                    var first = points[0];
+                    var r = 8;
+                    var a2 = Math.Atan2(first.Y - origin.Y, first.X - origin.X);
+                    using (var newPen = new Pen(color, lineWidth))
                     {
-                        Matrix move = new Matrix();
+                        var move = new Matrix();
                         move.Translate(4, 8);
                         end_path.Transform(move);
                         newPen.CustomEndCap = new CustomLineCap(null, end_path);
@@ -223,7 +223,7 @@ namespace CoachDraw
                     }
                     break;
                 case LineType.Pass:
-                    using (Pen newPen = new Pen(color, lineWidth))
+                    using (var newPen = new Pen(color, lineWidth))
                     {
                         newPen.DashStyle = DashStyle.Dash;
                         newPen.CustomEndCap = new CustomLineCap(null, end_path);
@@ -233,14 +233,14 @@ namespace CoachDraw
                 case LineType.Lateral:
                     if (points.Count == 2)
                     {
-                        Point firstLine = Smoothing.GetPointFromDistance(points[0], points[1], 30);
-                        Point secondLine = Smoothing.GetPointFromDistance(points[1], points[0], 30);
+                        var firstLine = Smoothing.GetPointFromDistance(points[0], points[1], 30);
+                        var secondLine = Smoothing.GetPointFromDistance(points[1], points[0], 30);
                         g.DrawLine(myPen, points[0], firstLine);
                         g.DrawLine(cappedPen, secondLine, points[1]);
-                        float angle = Smoothing.getAngle(points[0], points[1]) + 90;
+                        var angle = Smoothing.getAngle(points[0], points[1]) + 90;
                         while (Smoothing.GetLineLength(firstLine, secondLine) > 30)
                         {
-                            Point nextPoint = Smoothing.GetPointFromDistance(firstLine, points[1], 25);
+                            var nextPoint = Smoothing.GetPointFromDistance(firstLine, points[1], 25);
                             g.TranslateTransform(nextPoint.X, nextPoint.Y);
                             g.RotateTransform(angle);
                             g.DrawLine(myPen, new Point(-7, 0), new Point(7, 0));
@@ -252,12 +252,12 @@ namespace CoachDraw
                 case LineType.CarryingPuck:
                     if (points.Count == 2)
                     {
-                        int lineLength = Smoothing.GetLineLength(points[0], points[1]);
+                        var lineLength = Smoothing.GetLineLength(points[0], points[1]);
                         if (lineLength < 20) // turns out this line is messed up and shouldn't exist, probably a remnant from a bad PLY file
                             return false;
-                        PointF[] cpoints = new PointF[lineLength - 15];
-                        float angle = Smoothing.getAngle(points[0], points[1]);
-                        for (int i = 0; i < lineLength - 15; i++)
+                        var cpoints = new PointF[lineLength - 15];
+                        var angle = Smoothing.getAngle(points[0], points[1]);
+                        for (var i = 0; i < lineLength - 15; i++)
                         {
                             cpoints[i] = new PointF
                             {
@@ -277,27 +277,27 @@ namespace CoachDraw
                     {
                         g.DrawCurve(cappedPen, points.ToArray());
                         var cpoints = new List<PointF>();
-                        int start = 0;
-                        bool bottom = false;
-                        for (int i = 0; i < points.Count; i++)
+                        var start = 0;
+                        var bottom = false;
+                        for (var i = 0; i < points.Count; i++)
                         {
-                            int length = Smoothing.GetLineLength(points[start], points[i]);
+                            var length = Smoothing.GetLineLength(points[start], points[i]);
                             if (length <= 20) continue;
                             {
-                                double angle2 = (Math.PI / 2) - Math.Atan2(points[i].Y - points[start].Y, points[i].X - points[start].X);
-                                int x = (int)Math.Round(Math.Sin(angle2) * 20, MidpointRounding.AwayFromZero);
-                                int y = (int)Math.Round(Math.Cos(angle2) * 20, MidpointRounding.AwayFromZero);
-                                Point newPoint = new Point(points[start].X + x, points[start].Y + y);
+                                var angle2 = (Math.PI / 2) - Math.Atan2(points[i].Y - points[start].Y, points[i].X - points[start].X);
+                                var x = (int)Math.Round(Math.Sin(angle2) * 20, MidpointRounding.AwayFromZero);
+                                var y = (int)Math.Round(Math.Cos(angle2) * 20, MidpointRounding.AwayFromZero);
+                                var newPoint = new Point(points[start].X + x, points[start].Y + y);
                                 length = Smoothing.GetLineLength(points[start], newPoint);
                                 points.Insert(i, newPoint);
                             }
                             if (getAggregateLength(i, points.Count - 1) < 20) break;
 
-                            float angle = Smoothing.getAngle(points[start], points[i]);
+                            var angle = Smoothing.getAngle(points[start], points[i]);
 
-                            for (int j = 0; j <= length; j++)
+                            for (var j = 0; j <= length; j++)
                             {
-                                PointF newPoint = new PointF
+                                var newPoint = new PointF
                                 {
                                     X = j,
                                     Y = -1 * (float)(Math.Sin(10 * Math.PI * (bottom ? j + 20 : j) / 200) * 10)
@@ -317,14 +317,14 @@ namespace CoachDraw
                 case LineType.Backward:
                     if (points.Count == 2)
                     {
-                        int lineLength = Smoothing.GetLineLength(points[0], points[1]);
-                        List<PointF> cpoints = new List<PointF>();
-                        float angle = (float)(Math.Atan2(points[1].Y - points[0].Y, points[1].X - points[0].X) * 180 / Math.PI);
+                        var lineLength = Smoothing.GetLineLength(points[0], points[1]);
+                        var cpoints = new List<PointF>();
+                        var angle = (float)(Math.Atan2(points[1].Y - points[0].Y, points[1].X - points[0].X) * 180 / Math.PI);
                         g.TranslateTransform(points[0].X, points[0].Y);
                         g.RotateTransform(angle);
-                        for (int i = 0; i < lineLength - 15; i++)
+                        for (var i = 0; i < lineLength - 15; i++)
                         {
-                            PointF point = new PointF
+                            var point = new PointF
                             {
                                 X = i,
                                 Y = -1 * (float)(Math.Sin(10 * Math.PI * i / 200) * 10)
@@ -345,33 +345,33 @@ namespace CoachDraw
                     }
                     else
                     {
-                        List<PointF> cpoints = new List<PointF>();
-                        int start = 0;
-                        bool bottom = false;
-                        for (int i = 0; i < points.Count; i++)
+                        var cpoints = new List<PointF>();
+                        var start = 0;
+                        var bottom = false;
+                        for (var i = 0; i < points.Count; i++)
                         {
-                            int length = Smoothing.GetLineLength(points[start], points[i]);
+                            var length = Smoothing.GetLineLength(points[start], points[i]);
                             if (length < 20) continue;
 
                             if (length > 20)
                             {
-                                Point eh = points[start];
-                                Point meh = points[i];
-                                double angle2 = (Math.PI / 2) - Math.Atan2(meh.Y - eh.Y, meh.X - eh.X);
-                                int x = (int)Math.Round(Math.Sin(angle2) * 20, MidpointRounding.AwayFromZero);
-                                int y = (int)Math.Round(Math.Cos(angle2) * 20, MidpointRounding.AwayFromZero);
-                                Point bleh = new Point(eh.X + x, eh.Y + y);
+                                var eh = points[start];
+                                var meh = points[i];
+                                var angle2 = (Math.PI / 2) - Math.Atan2(meh.Y - eh.Y, meh.X - eh.X);
+                                var x = (int)Math.Round(Math.Sin(angle2) * 20, MidpointRounding.AwayFromZero);
+                                var y = (int)Math.Round(Math.Cos(angle2) * 20, MidpointRounding.AwayFromZero);
+                                var bleh = new Point(eh.X + x, eh.Y + y);
                                 length = Smoothing.GetLineLength(eh, bleh);
                                 points.Insert(i, bleh);
                             }
                             if (getAggregateLength(i, points.Count - 1) < 20) break;
 
-                            float angle = (float)(Math.Atan2(points[i].Y - points[start].Y, points[i].X - points[start].X) * 180 / Math.PI);
+                            var angle = (float)(Math.Atan2(points[i].Y - points[start].Y, points[i].X - points[start].X) * 180 / Math.PI);
                             g.TranslateTransform(points[start].X, points[start].Y);
                             g.RotateTransform(angle);
-                            for (int j = 0; j < length; j++)
+                            for (var j = 0; j < length; j++)
                             {
-                                PointF newPoint = new PointF
+                                var newPoint = new PointF
                                 {
                                     X = j,
                                     Y = -1 * (float)(Math.Sin(10 * Math.PI * (bottom ? j + 20 : j) / 200) * 10)

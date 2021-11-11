@@ -25,8 +25,8 @@ namespace CoachDraw
         // Find the point on a line (from point1 to point2), x units away from the start
         public static Point GetPointFromDistance(Point point1, Point point2, int x)
         {
-            int d = GetLineLength(point1, point2);
-            double t = (double) x / d;
+            var d = GetLineLength(point1, point2);
+            var t = (double) x / d;
             return new Point((int)(((1 - t) * point1.X) + (t * point2.X)), (int)(((1 - t) * point1.Y) + (t * point2.Y)));
         }
 
@@ -37,9 +37,9 @@ namespace CoachDraw
 
         public static List<Point> BasicReduction(List<Point> points, int interval)
         {
-            int count = 0;
-            List<Point> returnVal = new List<Point>();
-            for (int i = 0; i < points.Count - 1; i++)
+            var count = 0;
+            var returnVal = new List<Point>();
+            for (var i = 0; i < points.Count - 1; i++)
             {
                 if (count++ % interval == 0) returnVal.Add(points[i]);
             }
@@ -50,12 +50,12 @@ namespace CoachDraw
         public static List<Point> McMasters(List<Point> points)
         {
             if (points == null || points.Count < 5) return points;
-            List<Point> returnPoints = new List<Point> { points[0], points[1] };
-            for (int i = 2; i < points.Count - 2; i++)
+            var returnPoints = new List<Point> { points[0], points[1] };
+            for (var i = 2; i < points.Count - 2; i++)
             {
-                double x = (points[i - 2].X + points[i - 1].X + points[i].X + points[i + 1].X + points[i + 2].X) / 5.0;
-                double y = (points[i - 2].Y + points[i - 1].Y + points[i].Y + points[i + 1].Y + points[i + 2].Y) / 5.0;
-                Point midpoint = GetMidPoint(points[i].X, points[i].Y, (int)Math.Round(x, MidpointRounding.AwayFromZero), (int)Math.Round(y, MidpointRounding.AwayFromZero));
+                var x = (points[i - 2].X + points[i - 1].X + points[i].X + points[i + 1].X + points[i + 2].X) / 5.0;
+                var y = (points[i - 2].Y + points[i - 1].Y + points[i].Y + points[i + 1].Y + points[i + 2].Y) / 5.0;
+                var midpoint = GetMidPoint(points[i].X, points[i].Y, (int)Math.Round(x, MidpointRounding.AwayFromZero), (int)Math.Round(y, MidpointRounding.AwayFromZero));
                 returnPoints.Add(midpoint);
             }
             returnPoints.Add(points[points.Count - 2]);
@@ -107,11 +107,11 @@ namespace CoachDraw
             while (true)
             {
                 double maxDistance = 0;
-                int indexFarthest = 0;
+                var indexFarthest = 0;
 
-                for (int index = firstPoint; index < lastPoint; index++)
+                for (var index = firstPoint; index < lastPoint; index++)
                 {
-                    double distance = PerpendicularDistance(points[firstPoint], points[lastPoint], points[index]);
+                    var distance = PerpendicularDistance(points[firstPoint], points[lastPoint], points[index]);
                     if (!(distance > maxDistance)) continue;
                     maxDistance = distance;
                     indexFarthest = index;

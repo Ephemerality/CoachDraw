@@ -42,7 +42,7 @@ namespace CoachDraw
             try
             {
                 Directory.CreateDirectory(Properties.Settings.Default.playDir + @"\" + result);
-                Tuple<string, string> newCategory = new Tuple<string, string>(result, Properties.Settings.Default.playDir + @"\" + result);
+                var newCategory = new Tuple<string, string>(result, Properties.Settings.Default.playDir + @"\" + result);
                 _categories.Add(newCategory);
                 lstCategories.SelectedItem = newCategory;
                 GenerateName(_categories[lstCategories.SelectedIndex].Item2);
@@ -77,7 +77,7 @@ namespace CoachDraw
             _categories.Clear();
             lstCategories.SelectedIndexChanged -= lstCategories_SelectedIndexChanged;
             var dirs = new List<string>(Directory.EnumerateDirectories(dir));
-            foreach (string category in dirs)
+            foreach (var category in dirs)
             {
                 _categories.Add(new Tuple<string, string>(Path.GetFileName(category), category));
             }
@@ -89,7 +89,7 @@ namespace CoachDraw
         {
             if (Properties.Settings.Default.playDir == "")
             {
-                string playPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "CoachDraw");
+                var playPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "CoachDraw");
                 if (!Directory.Exists(playPath))
                     Directory.CreateDirectory(playPath);
                 Properties.Settings.Default.playDir = playPath;

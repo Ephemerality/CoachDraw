@@ -20,7 +20,7 @@ namespace CoachDraw
             _txtPlay = new Control[] { txtPlay0, txtPlay1, txtPlay2, txtPlay3 };
             if (Properties.Settings.Default.playDir == "")
             {
-                string playPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "CoachDraw");
+                var playPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "CoachDraw");
                 if (!Directory.Exists(playPath))
                     Directory.CreateDirectory(playPath);
                 Properties.Settings.Default.playDir = playPath;
@@ -34,7 +34,7 @@ namespace CoachDraw
                 SelectPlay(currentPlay);
             else
                 SelectPlay(lastPlay);
-            for (int i = 0; i < setPlays.Count; i++)
+            for (var i = 0; i < setPlays.Count; i++)
             {
                 _txtPlay[i].Text = CoachDraw.Plays.GetPLYXName(setPlays[i]);
                 _txtPlay[i].Tag = setPlays[0];
@@ -44,7 +44,7 @@ namespace CoachDraw
         private void SelectPlay(string play)
         {
             if (play == "") return;
-            string category = Path.GetDirectoryName(play);
+            var category = Path.GetDirectoryName(play);
             lstCategories.SelectedItem = _categories.First(r => r.Item2 == category);
             dgvFiles.ClearSelection();
             foreach (DataGridViewRow row in dgvFiles.Rows)
@@ -62,8 +62,8 @@ namespace CoachDraw
             if (!Directory.Exists(dir)) return;
             _categories.Clear();
             lstCategories.SelectedIndexChanged -= lstCategories_SelectedIndexChanged;
-            List<string> dirs = new List<string>(Directory.EnumerateDirectories(dir));
-            foreach (string category in dirs)
+            var dirs = new List<string>(Directory.EnumerateDirectories(dir));
+            foreach (var category in dirs)
             {
                 _categories.Add(new Tuple<string, string>(Path.GetFileName(category), category));
             }
@@ -75,8 +75,8 @@ namespace CoachDraw
         private void LoadPlays(string dir)
         {
             dgvFiles.Rows.Clear();
-            List<string> files = new List<string>(Directory.EnumerateFiles(dir));
-            foreach (string file in files)
+            var files = new List<string>(Directory.EnumerateFiles(dir));
+            foreach (var file in files)
             {
                 if (Path.GetExtension(file)?.ToUpper() != ".PLYX") continue;
                 dgvFiles.Rows.Add(Path.GetFileNameWithoutExtension(file), CoachDraw.Plays.GetPLYXName(file), file);
@@ -90,7 +90,7 @@ namespace CoachDraw
 
         private void btnClear_Click(object sender, EventArgs e)
         {
-            int index = Convert.ToInt32(((Button)sender).Name.Replace("btnClear", ""));
+            var index = Convert.ToInt32(((Button)sender).Name.Replace("btnClear", ""));
             _txtPlay[index].Text = "";
             _txtPlay[index].Tag = "";
         }
@@ -98,7 +98,7 @@ namespace CoachDraw
         private void btnSet_Click(object sender, EventArgs e)
         {
             if (dgvFiles.SelectedCells.Count == 0) return;
-            int index = Convert.ToInt32(((Button)sender).Name.Replace("btnSet", ""));
+            var index = Convert.ToInt32(((Button)sender).Name.Replace("btnSet", ""));
             _txtPlay[index].Text = (string)dgvFiles.SelectedRows[0].Cells[1].Value;
             _txtPlay[index].Tag = (string)dgvFiles.SelectedRows[0].Cells[2].Value;
         }

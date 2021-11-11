@@ -25,7 +25,7 @@ namespace CoachDraw
             // Smallest possible PLYX is 17 bytes
             if (file == null || file.Length < 17) return 0;
             file.Position = 0;
-            byte[] buf = new byte[4];
+            var buf = new byte[4];
             if (file.Read(buf, 0, 4) != 4) throw new IOException("Failed to read header values from plyx file.");
             if (buf[0] != 80 && buf[1] != 76 && buf[2] != 89 && buf[3] != 88) return 0; // Check for "PLYX"
             if (file.Read(buf, 0, 4) != 4) throw new IOException("Failed to read version values from plyx file.");
@@ -34,8 +34,8 @@ namespace CoachDraw
 
         public static Play LoadPLYXFile(string filePath)
         {
-            Play result = new Play();
-            using (BinaryReader bw = new BinaryReader(File.OpenRead(filePath), Encoding.UTF8))
+            var result = new Play();
+            using (var bw = new BinaryReader(File.OpenRead(filePath), Encoding.UTF8))
             {
                 result.Version = ValidatePLYXHeader(bw.BaseStream);
                 if (result.Version < 1 || result.Version > CurrentPlyxVersion)
@@ -44,10 +44,10 @@ namespace CoachDraw
                 result.Description = bw.ReadString();
                 if (result.Version != 1) // Default was IIHF in version 1
                     result.RinkType = (RinkType) bw.ReadByte();
-                int numObjs = bw.ReadInt32();
-                for (int i = 0; i < numObjs; i++)
+                var numObjs = bw.ReadInt32();
+                for (var i = 0; i < numObjs; i++)
                 {
-                    DrawObj newObj = new DrawObj
+                    var newObj = new DrawObj
                     {
                         objType = (ItemType) bw.ReadByte(),
                         color = ColorTranslator.FromWin32(bw.ReadInt32()),
@@ -67,10 +67,10 @@ namespace CoachDraw
                             endType = (EndType) bw.ReadByte(),
                             lineWidth = bw.ReadByte()
                         };
-                        int numPoints = bw.ReadInt32();
-                        for (int j = 0; j < numPoints; j++)
+                        var numPoints = bw.ReadInt32();
+                        for (var j = 0; j < numPoints; j++)
                         {
-                            Point newPoint = new Point
+                            var newPoint = new Point
                             {
                                 X = bw.ReadInt32(),
                                 Y = bw.ReadInt32()
@@ -126,7 +126,7 @@ namespace CoachDraw
         public static string GetPLYXName(string filePath)
         {
             if (!File.Exists(filePath)) return "";
-            using (BinaryReader br = new BinaryReader(File.OpenRead(filePath), Encoding.UTF8))
+            using (var br = new BinaryReader(File.OpenRead(filePath), Encoding.UTF8))
             {
                 return ValidatePLYXHeader(br.BaseStream) != 1
                     ? "**Invalid play file**"
@@ -137,14 +137,14 @@ namespace CoachDraw
         public static bool RenamePLYX(string filePath, string newName)
         {
             if (!File.Exists(filePath)) return false;
-            using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.ReadWrite))
+            using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.ReadWrite))
             {
-                BinaryReader br = new BinaryReader(fs, Encoding.UTF8);
+                var br = new BinaryReader(fs, Encoding.UTF8);
                 if (ValidatePLYXHeader(br.BaseStream) != 1) return false;
                 br.ReadString();
                 var actualLen = (int)(br.BaseStream.Length - br.BaseStream.Position);
                 var bytes = br.ReadBytes(actualLen);
-                BinaryWriter bw = new BinaryWriter(fs, Encoding.UTF8);
+                var bw = new BinaryWriter(fs, Encoding.UTF8);
                 bw.BaseStream.Position = 8;
                 bw.Write(newName);
                 fs.SetLength(bw.BaseStream.Position + actualLen);
@@ -156,7 +156,7 @@ namespace CoachDraw
         public static string GetPLYName(string filePath)
         {
             if (!File.Exists(filePath)) return "";
-            using (StreamReader file = new StreamReader(filePath))
+            using (var file = new StreamReader(filePath))
             {
                 file.ReadLine();
                 file.ReadLine();
@@ -167,21 +167,21 @@ namespace CoachDraw
         // TODO: Review
         public static Play LoadPLYFile(string filePath)
         {
-            Play result = new Play();
+            var result = new Play();
             if (!File.Exists(filePath)) return null;
             try
             {
-                using (StreamReader file = new StreamReader(filePath))
+                using (var file = new StreamReader(filePath))
                 {
                     file.ReadLine(); // Play v01
                     file.ReadLine(); // H00 or H01
                     result.Name = file.ReadLine();
-                    int items = int.Parse(file.ReadLine()); //# of items
-                    int prevType = 3;
-                    for (int i = 1; i <= items; i++)
+                    var items = int.Parse(file.ReadLine()); //# of items
+                    var prevType = 3;
+                    for (var i = 1; i <= items; i++)
                     {
-                        int type = int.Parse(file.ReadLine());
-                        string[] words = file.ReadLine().Split(' ');
+                        var type = int.Parse(file.ReadLine());
+                        var words = file.ReadLine().Split(' ');
                         // type 4 = line, type 3 = object
                         // lines always have an object attached
                         if (type == 4)
@@ -197,7 +197,7 @@ namespace CoachDraw
                                 continue;
                             }
 
-                            DrawObj newObj = new DrawObj
+                            var newObj = new DrawObj
                             {
                                 objLine = new Line
                                 {
@@ -215,8 +215,8 @@ namespace CoachDraw
                             newObj.objLine.color = ColorTranslator.FromWin32(int.Parse(words[0]));
                             words = file.ReadLine().Split(' ');
                             // Read line and check points for bad lines (some plays seem to have artifact objects in them)
-                            bool valid = false;
-                            for (int j = 0; j < words.Length - 1; j += 2)
+                            var valid = false;
+                            for (var j = 0; j < words.Length - 1; j += 2)
                             {
                                 if (!valid && words[j] != "0" && words[j + 1] != "0") valid = true;
                                 newObj.objLine.points.Add(new Point(int.Parse(words[j]), int.Parse(words[j + 1])));
@@ -247,12 +247,12 @@ namespace CoachDraw
                     result.Objects.RemoveAll(o => o.objLine == null && o.objType == ItemType.None && o.objLabel == -1);
 
                     file.ReadLine(); // Blank line
-                    int skipLines = int.Parse(file.ReadLine()); // Skip "attach" list as it is already guaranteed that legit lines will always have an object attached
-                    for (int i = 1; i <= skipLines; i++) file.ReadLine();
+                    var skipLines = int.Parse(file.ReadLine()); // Skip "attach" list as it is already guaranteed that legit lines will always have an object attached
+                    for (var i = 1; i <= skipLines; i++) file.ReadLine();
 
                     skipLines = int.Parse(file.ReadLine());
-                    StringBuilder comment = new StringBuilder();
-                    for (int i = 0; i < skipLines; i++)
+                    var comment = new StringBuilder();
+                    for (var i = 0; i < skipLines; i++)
                     {
                         comment.Append(file.ReadLine().Replace("\"", "") + "\r\n");
                     }

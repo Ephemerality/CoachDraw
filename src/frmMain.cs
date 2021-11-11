@@ -22,7 +22,7 @@ namespace CoachDraw
 
         static string compactString(string path, int length)
         {
-            StringBuilder sb = new StringBuilder(length + 1);
+            var sb = new StringBuilder(length + 1);
             PathCompactPathEx(sb, path, length + 1, 0);
             return sb.ToString();
         }
@@ -59,7 +59,7 @@ namespace CoachDraw
             LineTypeBox.SelectedIndex = 0;
             EndTypeBox.SelectedIndex = 0;
             PlayerNumBox.Items.Add("None");
-            for (int i = 0; i < 100; i++)
+            for (var i = 0; i < 100; i++)
                 PlayerNumBox.Items.Add(i.ToString());
             PlayerNumBox.SelectedIndex = 0;
             foreach (var val in Enum.GetNames(typeof(RinkType)))
@@ -115,8 +115,8 @@ namespace CoachDraw
             if (e.Button == MouseButtons.Right)
             {
 
-                List<int> hits = new List<int>();
-                for (int i = 0; i < _currentPlay.Objects.Count; i++)
+                var hits = new List<int>();
+                for (var i = 0; i < _currentPlay.Objects.Count; i++)
                 {
                     if (_currentPlay.Objects[i].hitBox != null && _currentPlay.Objects[i].hitBox.IsVisible(e.X, e.Y) ||
                         _currentPlay.Objects[i].objLine != null && _currentPlay.Objects[i].objLine.hitBox != null && _currentPlay.Objects[i].objLine.hitBox.IsVisible(e.X, e.Y))
@@ -157,7 +157,7 @@ namespace CoachDraw
             {
                 if (!_mouseDown) return;
                 _mouseDown = false;
-                foreach (DrawObj o in _currentPlay.Objects)
+                foreach (var o in _currentPlay.Objects)
                 {
                     if (o.objLoc.Equals(_startPoint))
                         return;
@@ -182,7 +182,7 @@ namespace CoachDraw
                     foreach (ToolStripMenuItem item in widthBox.DropDownItems)
                         if (item.Checked) newObj.objLine.lineWidth = byte.Parse(item.Text.Remove(1));
 
-                    int lineLength = 0;
+                    var lineLength = 0;
                     if (_selectedTool == "Line")
                     {
                         lineLength = Smoothing.GetLineLength(_startPoint, _endPoint);
@@ -217,8 +217,8 @@ namespace CoachDraw
         {
             if (_tempDraw != null && _mouseDown)
             {
-                Graphics g = Graphics.FromImage(_tempDraw);
-                Pen myPen = new Pen(Color.Black, 1);
+                var g = Graphics.FromImage(_tempDraw);
+                var myPen = new Pen(Color.Black, 1);
                 if (_selectedTool == "Line")
                     g.DrawLine(myPen, _startPoint, _endPoint);
                 else if (_selectedTool == "Pencil")
@@ -238,9 +238,9 @@ namespace CoachDraw
 
         private void clickItemList(object sender, EventArgs e)
         {
-            ToolStripMenuItem mn = (ToolStripMenuItem)sender;
-            int i = -1;
-            ToolStripItem next = mn.OwnerItem;
+            var mn = (ToolStripMenuItem)sender;
+            var i = -1;
+            var next = mn.OwnerItem;
             while (next != null)
             {
                 if (next.Owner.GetType() == typeof(ContextMenuStrip))
@@ -277,7 +277,7 @@ namespace CoachDraw
         private void deleteItem(object sender, EventArgs e)
         {
             var mn = (ToolStripMenuItem)sender;
-            int i = mn.Owner.GetType() == typeof(ContextMenuStrip) ? (int)mn.Owner.Tag : (int)mn.OwnerItem.Tag;
+            var i = mn.Owner.GetType() == typeof(ContextMenuStrip) ? (int)mn.Owner.Tag : (int)mn.OwnerItem.Tag;
             _currentPlay.Objects.RemoveAt(i);
             _saved = false;
             redraw();
@@ -290,7 +290,7 @@ namespace CoachDraw
             var itemList = new List<ToolStripItem>();
             var lineList = new List<ToolStripItem>();
             var endList = new List<ToolStripItem>();
-            foreach (string itemtype in Enum.GetNames(typeof(ItemType)))
+            foreach (var itemtype in Enum.GetNames(typeof(ItemType)))
             {
                 var m = new ToolStripMenuItem(itemtype, null, clickItemList);
                 if (it != -1 && Enum.GetName(typeof(ItemType), it).Equals(itemtype)) { m.Checked = true; }
@@ -298,19 +298,19 @@ namespace CoachDraw
             }
             lineList.Add(new ToolStripMenuItem("Delete Line", null, clickItemList));
             lineList.Add(new ToolStripSeparator());
-            foreach (string linetype in Enum.GetNames(typeof(LineType)))
+            foreach (var linetype in Enum.GetNames(typeof(LineType)))
             {
                 var m = new ToolStripMenuItem(linetype, null, clickItemList);
                 if (lt != -1 && !m.Checked && Enum.GetName(typeof(LineType), lt).Equals(linetype)) { m.Checked = true; }
                 lineList.Add(m);
             }
-            foreach (string endtype in Enum.GetNames(typeof(EndType)))
+            foreach (var endtype in Enum.GetNames(typeof(EndType)))
             {
                 var m = new ToolStripMenuItem(endtype, null, clickItemList);
                 if (et != -1 && !m.Checked && Enum.GetName(typeof(EndType), et).Equals(endtype)) { m.Checked = true; }
                 endList.Add(m);
             }
-            ToolStripItem[] mn = new ToolStripItem[5];
+            var mn = new ToolStripItem[5];
             mn[0] = new ToolStripMenuItem("Item Type", null, itemList.ToArray()) { Tag = 0 };
             mn[1] = new ToolStripMenuItem("Line Type", null, lineList.ToArray()) { Tag = 1 };
             if (lt == -1) mn[1].Enabled = false;
@@ -325,12 +325,12 @@ namespace CoachDraw
         {
             _snapshot.Dispose();
             _snapshot = new Bitmap(panel1.ClientRectangle.Width, panel1.ClientRectangle.Height);
-            using (Graphics g = Graphics.FromImage(_snapshot))
+            using (var g = Graphics.FromImage(_snapshot))
             {
                 g.SmoothingMode = SmoothingMode.HighQuality;
                 drawRink(g);
                 g.SmoothingMode = SmoothingMode.None;
-                foreach (DrawObj o in _currentPlay.Objects)
+                foreach (var o in _currentPlay.Objects)
                 {
                     o.Draw(g, _selected?.Equals(o) ?? false);
                 }
@@ -354,7 +354,7 @@ namespace CoachDraw
                 /**  Lines  **/
                 g.DrawLine(bluePen, rinkCenterX - (float)_curSpecs.BlueLineFromCenter, 0, rinkCenterX - (float)_curSpecs.BlueLineFromCenter, (float)_curSpecs.RinkHeight); //Left blue line
                 g.DrawLine(bluePen, rinkCenterX + (float)_curSpecs.BlueLineFromCenter, 0, rinkCenterX + (float)_curSpecs.BlueLineFromCenter, (float)_curSpecs.RinkHeight); //Right blue line
-                Pen centerPen = new Pen(Color.Red, 5)
+                var centerPen = new Pen(Color.Red, 5)
                 {
                     DashCap = DashCap.Round,
                     DashStyle = DashStyle.Dash,
@@ -423,7 +423,7 @@ namespace CoachDraw
                 if (colorDialog1.Color.IsNamedColor) colorLabel.Text = colorDialog1.Color.Name;
                 else
                 {
-                    int x = colorDialog1.Color.ToArgb();
+                    var x = colorDialog1.Color.ToArgb();
                     colorLabel.Text = "#" + ((x >> 16) & 0xFF).ToString("X2") + ((x >> 8) & 0xFF).ToString("X2") + (x & 0xFF).ToString("X2");
                 }
                 colorLabel.ForeColor = colorDialog1.Color;
@@ -488,7 +488,7 @@ namespace CoachDraw
             var sc = Properties.Settings.Default.recentFiles;
             if (sc != null && sc.Count > 0)
             {
-                for (int i = 0; i < sc.Count; i++)
+                for (var i = 0; i < sc.Count; i++)
                 {
                     var path = sc[i];
                     if (!File.Exists(path))
@@ -565,7 +565,7 @@ namespace CoachDraw
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (!checkSaved("opening a new play")) return;
-            OpenFileDialog dlg = new OpenFileDialog
+            var dlg = new OpenFileDialog
             {
                 Filter = "All supported files (*.ply, *.plyx)|*.ply;*.plyx|New play files (*.plyx)|*.plyx|HockeyVision play files (*.ply)|*.ply|All files (*.*)|*.*",
                 FilterIndex = 2
@@ -577,7 +577,7 @@ namespace CoachDraw
         private bool checkSaved(string operation)
         {
             if (_saved) return true;
-            DialogResult d = MessageBox.Show("The current play is not saved. Do you want to save before " + operation + "?", "Unsaved Play", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button3);
+            var d = MessageBox.Show("The current play is not saved. Do you want to save before " + operation + "?", "Unsaved Play", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button3);
             if (d == DialogResult.Yes)
                 saveToolStripMenuItem_Click(saveToolStripMenuItem, null);
             else if (d == DialogResult.Cancel)
@@ -608,7 +608,7 @@ namespace CoachDraw
 
         private void openHVPlayToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            using (frmManage ld = new frmManage())
+            using (var ld = new frmManage())
             {
                 if (ld.ShowDialog() == DialogResult.Yes && ld.openPlay != "")
                     openFile(ld.openPlay, false);
@@ -617,7 +617,7 @@ namespace CoachDraw
 
         private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            using (frmSaveAs ld = new frmSaveAs(txtPlayName.Text))
+            using (var ld = new frmSaveAs(txtPlayName.Text))
             {
                 if (ld.ShowDialog() == DialogResult.Yes && Plays.SavePlyxFile(ld.fileName, _currentPlay, ld.playName, txtPlayDesc.Text))
                 {
@@ -634,11 +634,11 @@ namespace CoachDraw
         {
             while (font.Size > 0)
             {
-                SizeF size = g.MeasureString(text, font);
+                var size = g.MeasureString(text, font);
                 if (size.Height <= proposedSize.Height && size.Width <= proposedSize.Width)
                     return font;
 
-                Font oldFont = font;
+                var oldFont = font;
                 font = new Font(font.Name, font.Size * 0.9f, font.Style);
                 oldFont.Dispose();
             }
@@ -665,7 +665,7 @@ namespace CoachDraw
             };
             var dialog = new PrintDialog { Document = pd };
             if (dialog.ShowDialog() != DialogResult.OK) return;
-            PrintPreviewDialog pp = new PrintPreviewDialog { Document = pd };
+            var pp = new PrintPreviewDialog { Document = pd };
             pp.ShowDialog();
             //pd.PrinterSettings = dialog.PrinterSettings;
             //pd.Print();
@@ -688,7 +688,7 @@ namespace CoachDraw
             pd.PrintPage += (printSender, pe) =>
             {
                 float posy = 50;
-                foreach (string play in plays)
+                foreach (var play in plays)
                 {
                     if (play == "")
                     {
@@ -709,12 +709,12 @@ namespace CoachDraw
                     }
                     pe.Graphics.DrawLine(new Pen(Color.Black, 1.0f), 0.0f, posy, 1100.0f, posy);
                     posy += 5.0f;
-                    int newWidth = (int)(240.0 / rink.Height * rink.Width);
+                    var newWidth = (int)(240.0 / rink.Height * rink.Width);
                     pe.Graphics.DrawImage(rink, new Rectangle(50, (int)posy, newWidth, 240));
-                    Font nameFont = ShrinkFont(pe.Graphics, result.Name, new Font("Helvetica", 11.0f, FontStyle.Bold), new Size(750 - newWidth - 10, 100));
-                    SizeF nameSize = pe.Graphics.MeasureString(result.Name, nameFont);
+                    var nameFont = ShrinkFont(pe.Graphics, result.Name, new Font("Helvetica", 11.0f, FontStyle.Bold), new Size(750 - newWidth - 10, 100));
+                    var nameSize = pe.Graphics.MeasureString(result.Name, nameFont);
                     pe.Graphics.DrawString(result.Name, nameFont, new SolidBrush(Color.Black), 50.0f + newWidth + 10.0f, posy);
-                    Font descFont = ShrinkFont(pe.Graphics, result.Description, new Font("Helvetica", 8.0f), new Size(750 - newWidth - 10, 240 - (int)nameSize.Height - 5));
+                    var descFont = ShrinkFont(pe.Graphics, result.Description, new Font("Helvetica", 8.0f), new Size(750 - newWidth - 10, 240 - (int)nameSize.Height - 5));
                     pe.Graphics.DrawString(result.Description, descFont, new SolidBrush(Color.Black), 50.0f + newWidth + 10.0f, posy + nameSize.Height + 5.0f);
                     posy += 245.0f;
                     pe.Graphics.DrawLine(new Pen(Color.Black, 1.0f), 0.0f, posy, 1100.0f, posy);
