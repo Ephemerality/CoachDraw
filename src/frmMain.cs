@@ -343,12 +343,11 @@ namespace CoachDraw
         [SuppressMessage("ReSharper", "ArrangeRedundantParentheses")]
         private void drawRink(Graphics g)
         {
-            using (var blackPen = new Pen(Color.Black, 2))
-            using (var redPen = new Pen(Color.Red, 2))
-            using (var bluePen = new Pen(Color.Blue, 2))
-            using (var redBrush = new SolidBrush(Color.Red))
-            using (var blueBrush = new SolidBrush(Color.Blue))
-            {
+            using var blackPen = new Pen(Color.Black, 2);
+            using var redPen = new Pen(Color.Red, 2);
+            using var bluePen = new Pen(Color.Blue, 2);
+            using var redBrush = new SolidBrush(Color.Red);
+            using var blueBrush = new SolidBrush(Color.Blue);
             var rinkCenterX = (float)_curSpecs.RinkWidth / 2f;
             var rinkCenterY = (float)_curSpecs.RinkHeight / 2f;
             /**  Lines  **/
@@ -403,7 +402,6 @@ namespace CoachDraw
             g.DrawEllipse(redPen, (float)_curSpecs.EdgeToCircle - (float)_curSpecs.CircleRadius, rinkCenterY + (float)_curSpecs.CenterNetToCircle - (float)_curSpecs.CircleRadius, (float)_curSpecs.CircleRadius * 2, (float)_curSpecs.CircleRadius * 2); //Bottom left
             g.DrawEllipse(redPen, (float)_curSpecs.RinkWidth - (float)_curSpecs.EdgeToCircle - (float)_curSpecs.CircleRadius, rinkCenterY + (float)_curSpecs.CenterNetToCircle - (float)_curSpecs.CircleRadius, (float)_curSpecs.CircleRadius * 2, (float)_curSpecs.CircleRadius * 2); //Bottom right
             g.DrawEllipse(bluePen, rinkCenterX - (float)_curSpecs.CircleRadius, rinkCenterY - (float)_curSpecs.CircleRadius, (float)_curSpecs.CircleRadius * 2, (float)_curSpecs.CircleRadius * 2);
-            }
         }
 
         #region Menu Bar
@@ -608,25 +606,21 @@ namespace CoachDraw
 
         private void openHVPlayToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            using (var ld = new frmManage())
-            {
-                if (ld.ShowDialog() == DialogResult.Yes && ld.openPlay != "")
-                    openFile(ld.openPlay, false);
-            }
+            using var ld = new frmManage();
+            if (ld.ShowDialog() == DialogResult.Yes && ld.openPlay != "")
+                openFile(ld.openPlay, false);
         }
 
         private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            using (var ld = new frmSaveAs(txtPlayName.Text))
+            using var ld = new frmSaveAs(txtPlayName.Text);
+            if (ld.ShowDialog() == DialogResult.Yes && Plays.SavePlyxFile(ld.fileName, _currentPlay, ld.playName, txtPlayDesc.Text))
             {
-                if (ld.ShowDialog() == DialogResult.Yes && Plays.SavePlyxFile(ld.fileName, _currentPlay, ld.playName, txtPlayDesc.Text))
-                {
-                    txtPlayName.Text = ld.playName;
-                    _saved = true;
-                    _currentFile = ld.fileName;
-                    addRecentFile(ld.fileName);
-                    updateTitlebar();
-                }
+                txtPlayName.Text = ld.playName;
+                _saved = true;
+                _currentFile = ld.fileName;
+                addRecentFile(ld.fileName);
+                updateTitlebar();
             }
         }
 
@@ -673,13 +667,11 @@ namespace CoachDraw
 
         private void printMultiple_Click(object sender, EventArgs e)
         {
-            using (var mp = new frmMultiPrint(_currentFile, _lastSelectedMultiPrint, _lastSetMultiPrint))
-            {
-                if (mp.ShowDialog() == DialogResult.Yes)
-                    PrintMultiplePlays(mp.Plays);
-                _lastSelectedMultiPrint = mp.LastSelected;
-                _lastSetMultiPrint = mp.Plays ?? new List<string> { "", "", "", "" };
-            }
+            using var mp = new frmMultiPrint(_currentFile, _lastSelectedMultiPrint, _lastSetMultiPrint);
+            if (mp.ShowDialog() == DialogResult.Yes)
+                PrintMultiplePlays(mp.Plays);
+            _lastSelectedMultiPrint = mp.LastSelected;
+            _lastSetMultiPrint = mp.Plays ?? new List<string> { "", "", "", "" };
         }
 
         private void PrintMultiplePlays(List<string> plays)
