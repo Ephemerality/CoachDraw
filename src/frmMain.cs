@@ -349,60 +349,60 @@ namespace CoachDraw
             using (var redBrush = new SolidBrush(Color.Red))
             using (var blueBrush = new SolidBrush(Color.Blue))
             {
-                var rinkCenterX = (float)_curSpecs.RinkWidth / 2f;
-                var rinkCenterY = (float)_curSpecs.RinkHeight / 2f;
-                /**  Lines  **/
-                g.DrawLine(bluePen, rinkCenterX - (float)_curSpecs.BlueLineFromCenter, 0, rinkCenterX - (float)_curSpecs.BlueLineFromCenter, (float)_curSpecs.RinkHeight); //Left blue line
-                g.DrawLine(bluePen, rinkCenterX + (float)_curSpecs.BlueLineFromCenter, 0, rinkCenterX + (float)_curSpecs.BlueLineFromCenter, (float)_curSpecs.RinkHeight); //Right blue line
-                var centerPen = new Pen(Color.Red, 5)
-                {
-                    DashCap = DashCap.Round,
-                    DashStyle = DashStyle.Dash,
-                    DashOffset = 0.5f
-                };
-                g.DrawLine(centerPen, rinkCenterX, 0, rinkCenterX, (float)_curSpecs.RinkHeight); //Centerline
-                centerPen.Dispose();
-                g.DrawLine(redPen, 65, 8, 65, (float)_curSpecs.RinkHeight - 8); //Left red line
-                g.DrawLine(redPen, (float)_curSpecs.RinkWidth - 66, 8, (float)_curSpecs.RinkWidth - 66, (float)_curSpecs.RinkHeight - 8); //Right red line
+            var rinkCenterX = (float)_curSpecs.RinkWidth / 2f;
+            var rinkCenterY = (float)_curSpecs.RinkHeight / 2f;
+            /**  Lines  **/
+            g.DrawLine(bluePen, rinkCenterX - (float)_curSpecs.BlueLineFromCenter, 0, rinkCenterX - (float)_curSpecs.BlueLineFromCenter, (float)_curSpecs.RinkHeight); //Left blue line
+            g.DrawLine(bluePen, rinkCenterX + (float)_curSpecs.BlueLineFromCenter, 0, rinkCenterX + (float)_curSpecs.BlueLineFromCenter, (float)_curSpecs.RinkHeight); //Right blue line
+            var centerPen = new Pen(Color.Red, 5)
+            {
+                DashCap = DashCap.Round,
+                DashStyle = DashStyle.Dash,
+                DashOffset = 0.5f
+            };
+            g.DrawLine(centerPen, rinkCenterX, 0, rinkCenterX, (float)_curSpecs.RinkHeight); //Centerline
+            centerPen.Dispose();
+            g.DrawLine(redPen, 65, 8, 65, (float)_curSpecs.RinkHeight - 8); //Left red line
+            g.DrawLine(redPen, (float)_curSpecs.RinkWidth - 66, 8, (float)_curSpecs.RinkWidth - 66, (float)_curSpecs.RinkHeight - 8); //Right red line
 
-                /**  Nets  **/
-                g.DrawLine(blackPen, 65 - 20, rinkCenterY - 15, 64, rinkCenterY - 15); //Left top
-                g.DrawLine(blackPen, 65 - 20, rinkCenterY + 15, 64, rinkCenterY + 15); //Left bottom
-                g.DrawLine(blackPen, 65 - 20, rinkCenterY - 15, 65 - 20, rinkCenterY + 15); //Left side
-                g.FillPie(Brushes.PaleTurquoise, 66 - 40, rinkCenterY - 40, 80, 80, 270, 180); //Left arc
+            /**  Nets  **/
+            g.DrawLine(blackPen, 65 - 20, rinkCenterY - 15, 64, rinkCenterY - 15); //Left top
+            g.DrawLine(blackPen, 65 - 20, rinkCenterY + 15, 64, rinkCenterY + 15); //Left bottom
+            g.DrawLine(blackPen, 65 - 20, rinkCenterY - 15, 65 - 20, rinkCenterY + 15); //Left side
+            g.FillPie(Brushes.PaleTurquoise, 66 - 40, rinkCenterY - 40, 80, 80, 270, 180); //Left arc
 
-                g.DrawLine(blackPen, (float)_curSpecs.RinkWidth - 65 + 20, rinkCenterY - 15, (float)_curSpecs.RinkWidth - 65, rinkCenterY - 15); //Right
-                g.DrawLine(blackPen, (float)_curSpecs.RinkWidth - 65 + 20, rinkCenterY + 15, (float)_curSpecs.RinkWidth - 65, rinkCenterY + 15); //Right
-                g.DrawLine(blackPen, (float)_curSpecs.RinkWidth - 65 + 20, rinkCenterY - 15, (float)_curSpecs.RinkWidth - 65 + 20, rinkCenterY + 15); //Right
-                g.FillPie(Brushes.PaleTurquoise, (float)_curSpecs.RinkWidth - 67 - 40, rinkCenterY - 40, 80, 80, 90, 180); //Right arc
+            g.DrawLine(blackPen, (float)_curSpecs.RinkWidth - 65 + 20, rinkCenterY - 15, (float)_curSpecs.RinkWidth - 65, rinkCenterY - 15); //Right
+            g.DrawLine(blackPen, (float)_curSpecs.RinkWidth - 65 + 20, rinkCenterY + 15, (float)_curSpecs.RinkWidth - 65, rinkCenterY + 15); //Right
+            g.DrawLine(blackPen, (float)_curSpecs.RinkWidth - 65 + 20, rinkCenterY - 15, (float)_curSpecs.RinkWidth - 65 + 20, rinkCenterY + 15); //Right
+            g.FillPie(Brushes.PaleTurquoise, (float)_curSpecs.RinkWidth - 67 - 40, rinkCenterY - 40, 80, 80, 90, 180); //Right arc
 
-                /**  Black border  **/
-                g.DrawLine(blackPen, 100, 0, (float)_curSpecs.RinkWidth - 100, 0); //Top black line
-                g.DrawLine(blackPen, 1, 100, 1, (float)_curSpecs.RinkHeight - 100); //Left black line
-                g.DrawLine(blackPen, (float)_curSpecs.RinkWidth - 1, 100, (float)_curSpecs.RinkWidth - 1, (float)_curSpecs.RinkHeight - 100); //Right black line
-                g.DrawLine(blackPen, 100, (float)_curSpecs.RinkHeight - 1, (float)_curSpecs.RinkWidth - 100, (float)_curSpecs.RinkHeight - 1); //Bottom black line
-                g.DrawArc(blackPen, 0, 0, 200, 200, 180, 90); //Top left curve
-                g.DrawArc(blackPen, 0, (float)_curSpecs.RinkHeight - 201, 200, 200, 180, -90); //Bottom left curve
-                g.DrawArc(blackPen, (float)_curSpecs.RinkWidth - 201, 0, 200, 200, 270, 90); //Top right curve
-                g.DrawArc(blackPen, (float)_curSpecs.RinkWidth - 201, (float)_curSpecs.RinkHeight - 201, 200, 200, 90, -90); //Bottom right curve
+            /**  Black border  **/
+            g.DrawLine(blackPen, 100, 0, (float)_curSpecs.RinkWidth - 100, 0); //Top black line
+            g.DrawLine(blackPen, 1, 100, 1, (float)_curSpecs.RinkHeight - 100); //Left black line
+            g.DrawLine(blackPen, (float)_curSpecs.RinkWidth - 1, 100, (float)_curSpecs.RinkWidth - 1, (float)_curSpecs.RinkHeight - 100); //Right black line
+            g.DrawLine(blackPen, 100, (float)_curSpecs.RinkHeight - 1, (float)_curSpecs.RinkWidth - 100, (float)_curSpecs.RinkHeight - 1); //Bottom black line
+            g.DrawArc(blackPen, 0, 0, 200, 200, 180, 90); //Top left curve
+            g.DrawArc(blackPen, 0, (float)_curSpecs.RinkHeight - 201, 200, 200, 180, -90); //Bottom left curve
+            g.DrawArc(blackPen, (float)_curSpecs.RinkWidth - 201, 0, 200, 200, 270, 90); //Top right curve
+            g.DrawArc(blackPen, (float)_curSpecs.RinkWidth - 201, (float)_curSpecs.RinkHeight - 201, 200, 200, 90, -90); //Bottom right curve
 
-                /**  Dots  **/
-                g.FillEllipse(blueBrush, rinkCenterX - (float)_curSpecs.DotRadius, rinkCenterY - (float)_curSpecs.DotRadius, (float)_curSpecs.DotRadius * 2, (float)_curSpecs.DotRadius * 2); //Center dot
-                g.FillEllipse(redBrush, (float)_curSpecs.EdgeToCircle - (float)_curSpecs.DotRadius, rinkCenterY - (float)_curSpecs.CenterNetToCircle - (float)_curSpecs.DotRadius, (float)_curSpecs.DotRadius * 2, (float)_curSpecs.DotRadius * 2); //Top left
-                g.FillEllipse(redBrush, (float)_curSpecs.RinkWidth - (float)_curSpecs.EdgeToCircle - (float)_curSpecs.DotRadius, rinkCenterY - (float)_curSpecs.CenterNetToCircle - (float)_curSpecs.DotRadius, (float)_curSpecs.DotRadius * 2, (float)_curSpecs.DotRadius * 2); //Top right circle
-                g.FillEllipse(redBrush, (float)_curSpecs.EdgeToCircle - (float)_curSpecs.DotRadius, rinkCenterY + (float)_curSpecs.CenterNetToCircle - (float)_curSpecs.DotRadius, (float)_curSpecs.DotRadius * 2, (float)_curSpecs.DotRadius * 2); //Bottom left circle
-                g.FillEllipse(redBrush, (float)_curSpecs.RinkWidth - (float)_curSpecs.EdgeToCircle - (float)_curSpecs.DotRadius, rinkCenterY + (float)_curSpecs.CenterNetToCircle - (float)_curSpecs.DotRadius, (float)_curSpecs.DotRadius * 2, (float)_curSpecs.DotRadius * 2); //Bottom right circle
-                g.FillEllipse(redBrush, rinkCenterX - (float)_curSpecs.AuxDotsFromCenter - (float)_curSpecs.DotRadius, rinkCenterY - (float)_curSpecs.CenterNetToCircle - (float)_curSpecs.DotRadius, (float)_curSpecs.DotRadius * 2, (float)_curSpecs.DotRadius * 2);
-                g.FillEllipse(redBrush, rinkCenterX + (float)_curSpecs.AuxDotsFromCenter - (float)_curSpecs.DotRadius, rinkCenterY - (float)_curSpecs.CenterNetToCircle - (float)_curSpecs.DotRadius, (float)_curSpecs.DotRadius * 2, (float)_curSpecs.DotRadius * 2);
-                g.FillEllipse(redBrush, rinkCenterX - (float)_curSpecs.AuxDotsFromCenter - (float)_curSpecs.DotRadius, rinkCenterY + (float)_curSpecs.CenterNetToCircle - (float)_curSpecs.DotRadius, (float)_curSpecs.DotRadius * 2, (float)_curSpecs.DotRadius * 2);
-                g.FillEllipse(redBrush, rinkCenterX + (float)_curSpecs.AuxDotsFromCenter - (float)_curSpecs.DotRadius, rinkCenterY + (float)_curSpecs.CenterNetToCircle - (float)_curSpecs.DotRadius, (float)_curSpecs.DotRadius * 2, (float)_curSpecs.DotRadius * 2);
+            /**  Dots  **/
+            g.FillEllipse(blueBrush, rinkCenterX - (float)_curSpecs.DotRadius, rinkCenterY - (float)_curSpecs.DotRadius, (float)_curSpecs.DotRadius * 2, (float)_curSpecs.DotRadius * 2); //Center dot
+            g.FillEllipse(redBrush, (float)_curSpecs.EdgeToCircle - (float)_curSpecs.DotRadius, rinkCenterY - (float)_curSpecs.CenterNetToCircle - (float)_curSpecs.DotRadius, (float)_curSpecs.DotRadius * 2, (float)_curSpecs.DotRadius * 2); //Top left
+            g.FillEllipse(redBrush, (float)_curSpecs.RinkWidth - (float)_curSpecs.EdgeToCircle - (float)_curSpecs.DotRadius, rinkCenterY - (float)_curSpecs.CenterNetToCircle - (float)_curSpecs.DotRadius, (float)_curSpecs.DotRadius * 2, (float)_curSpecs.DotRadius * 2); //Top right circle
+            g.FillEllipse(redBrush, (float)_curSpecs.EdgeToCircle - (float)_curSpecs.DotRadius, rinkCenterY + (float)_curSpecs.CenterNetToCircle - (float)_curSpecs.DotRadius, (float)_curSpecs.DotRadius * 2, (float)_curSpecs.DotRadius * 2); //Bottom left circle
+            g.FillEllipse(redBrush, (float)_curSpecs.RinkWidth - (float)_curSpecs.EdgeToCircle - (float)_curSpecs.DotRadius, rinkCenterY + (float)_curSpecs.CenterNetToCircle - (float)_curSpecs.DotRadius, (float)_curSpecs.DotRadius * 2, (float)_curSpecs.DotRadius * 2); //Bottom right circle
+            g.FillEllipse(redBrush, rinkCenterX - (float)_curSpecs.AuxDotsFromCenter - (float)_curSpecs.DotRadius, rinkCenterY - (float)_curSpecs.CenterNetToCircle - (float)_curSpecs.DotRadius, (float)_curSpecs.DotRadius * 2, (float)_curSpecs.DotRadius * 2);
+            g.FillEllipse(redBrush, rinkCenterX + (float)_curSpecs.AuxDotsFromCenter - (float)_curSpecs.DotRadius, rinkCenterY - (float)_curSpecs.CenterNetToCircle - (float)_curSpecs.DotRadius, (float)_curSpecs.DotRadius * 2, (float)_curSpecs.DotRadius * 2);
+            g.FillEllipse(redBrush, rinkCenterX - (float)_curSpecs.AuxDotsFromCenter - (float)_curSpecs.DotRadius, rinkCenterY + (float)_curSpecs.CenterNetToCircle - (float)_curSpecs.DotRadius, (float)_curSpecs.DotRadius * 2, (float)_curSpecs.DotRadius * 2);
+            g.FillEllipse(redBrush, rinkCenterX + (float)_curSpecs.AuxDotsFromCenter - (float)_curSpecs.DotRadius, rinkCenterY + (float)_curSpecs.CenterNetToCircle - (float)_curSpecs.DotRadius, (float)_curSpecs.DotRadius * 2, (float)_curSpecs.DotRadius * 2);
 
-                /**  Circles  **/
-                g.DrawEllipse(redPen, (float)_curSpecs.EdgeToCircle - (float)_curSpecs.CircleRadius, rinkCenterY - (float)_curSpecs.CenterNetToCircle - (float)_curSpecs.CircleRadius, (float)_curSpecs.CircleRadius * 2, (float)_curSpecs.CircleRadius * 2); //Top left
-                g.DrawEllipse(redPen, (float)_curSpecs.RinkWidth - (float)_curSpecs.EdgeToCircle - (float)_curSpecs.CircleRadius, rinkCenterY - (float)_curSpecs.CenterNetToCircle - (float)_curSpecs.CircleRadius, (float)_curSpecs.CircleRadius * 2, (float)_curSpecs.CircleRadius * 2); //Top right
-                g.DrawEllipse(redPen, (float)_curSpecs.EdgeToCircle - (float)_curSpecs.CircleRadius, rinkCenterY + (float)_curSpecs.CenterNetToCircle - (float)_curSpecs.CircleRadius, (float)_curSpecs.CircleRadius * 2, (float)_curSpecs.CircleRadius * 2); //Bottom left
-                g.DrawEllipse(redPen, (float)_curSpecs.RinkWidth - (float)_curSpecs.EdgeToCircle - (float)_curSpecs.CircleRadius, rinkCenterY + (float)_curSpecs.CenterNetToCircle - (float)_curSpecs.CircleRadius, (float)_curSpecs.CircleRadius * 2, (float)_curSpecs.CircleRadius * 2); //Bottom right
-                g.DrawEllipse(bluePen, rinkCenterX - (float)_curSpecs.CircleRadius, rinkCenterY - (float)_curSpecs.CircleRadius, (float)_curSpecs.CircleRadius * 2, (float)_curSpecs.CircleRadius * 2);
+            /**  Circles  **/
+            g.DrawEllipse(redPen, (float)_curSpecs.EdgeToCircle - (float)_curSpecs.CircleRadius, rinkCenterY - (float)_curSpecs.CenterNetToCircle - (float)_curSpecs.CircleRadius, (float)_curSpecs.CircleRadius * 2, (float)_curSpecs.CircleRadius * 2); //Top left
+            g.DrawEllipse(redPen, (float)_curSpecs.RinkWidth - (float)_curSpecs.EdgeToCircle - (float)_curSpecs.CircleRadius, rinkCenterY - (float)_curSpecs.CenterNetToCircle - (float)_curSpecs.CircleRadius, (float)_curSpecs.CircleRadius * 2, (float)_curSpecs.CircleRadius * 2); //Top right
+            g.DrawEllipse(redPen, (float)_curSpecs.EdgeToCircle - (float)_curSpecs.CircleRadius, rinkCenterY + (float)_curSpecs.CenterNetToCircle - (float)_curSpecs.CircleRadius, (float)_curSpecs.CircleRadius * 2, (float)_curSpecs.CircleRadius * 2); //Bottom left
+            g.DrawEllipse(redPen, (float)_curSpecs.RinkWidth - (float)_curSpecs.EdgeToCircle - (float)_curSpecs.CircleRadius, rinkCenterY + (float)_curSpecs.CenterNetToCircle - (float)_curSpecs.CircleRadius, (float)_curSpecs.CircleRadius * 2, (float)_curSpecs.CircleRadius * 2); //Bottom right
+            g.DrawEllipse(bluePen, rinkCenterX - (float)_curSpecs.CircleRadius, rinkCenterY - (float)_curSpecs.CircleRadius, (float)_curSpecs.CircleRadius * 2, (float)_curSpecs.CircleRadius * 2);
             }
         }
 
