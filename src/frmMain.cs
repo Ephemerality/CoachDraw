@@ -667,7 +667,7 @@ namespace CoachDraw
                 var descFont = ShrinkFont(pe.Graphics, txtPlayDesc.Text, new Font("Helvetica", 10.0f), new Size(900, 750 - (int)posy));
                 var descSize = pe.Graphics.MeasureString(txtPlayDesc.Text, descFont);
                 pe.Graphics.DrawString(txtPlayDesc.Text, descFont, new SolidBrush(Color.Black), new RectangleF(50.0f, posy, 900.0f, 750.0f - posy));
-                pe.Graphics.DrawString("CoachDraw © 2017", new Font("Helvetica", 5.0f), new SolidBrush(Color.Black), 50, 825.0f);
+                pe.Graphics.DrawString("CoachDraw © 2021", new Font("Helvetica", 5.0f), new SolidBrush(Color.Black), 50, 825.0f);
             };
             var dialog = new PrintDialog { Document = pd };
             if (dialog.ShowDialog() != DialogResult.OK) return;
