@@ -1,6 +1,6 @@
 using System.Drawing;
 using System.Linq;
-using CoachDraw.Model;
+using CoachDraw.Drawables.Lines;
 using CoachDraw.Rink;
 using NUnit.Framework;
 

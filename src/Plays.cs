@@ -5,7 +5,7 @@ using System.IO;
 using System.Text;
 using CoachDraw.Drawables;
 using CoachDraw.Drawables.Items;
-using CoachDraw.Model;
+using CoachDraw.Drawables.Lines;
 using CoachDraw.Rink;
 
 namespace CoachDraw

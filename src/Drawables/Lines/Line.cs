@@ -5,7 +5,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using CoachDraw.Extensions;
 
-namespace CoachDraw.Model
+namespace CoachDraw.Drawables.Lines
 {
     public sealed class Line
     {
@@ -18,16 +18,10 @@ namespace CoachDraw.Model
         /// </summary>
         public EndType EndType { get; set; } = EndType.None;
         public byte LineWidth { get; set; } = 2;
-        public List<Point> Points { get; set; }
-        public Color Color { get; set; }
+        public List<Point> Points { get; set; } = new();
+        public Color Color { get; set; } = Color.Black;
         public Region HitBox { get; private set; }
         public bool Smoothed { get; set; }
-
-        public Line()
-        {
-            Points = new List<Point>();
-            Color = Color.Black;
-        }
 
         private void SetHitBox()
         {

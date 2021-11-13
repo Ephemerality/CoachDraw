@@ -1,4 +1,4 @@
-﻿namespace CoachDraw.Model
+﻿namespace CoachDraw.Drawables.Lines
 {
     public enum LineType : byte
     {

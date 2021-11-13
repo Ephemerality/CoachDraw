@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Drawing;
 using CoachDraw.Drawables.Items;
+using CoachDraw.Drawables.Lines;
 using CoachDraw.Extensions;
-using CoachDraw.Model;
 using JetBrains.Annotations;
 
 namespace CoachDraw.Drawables

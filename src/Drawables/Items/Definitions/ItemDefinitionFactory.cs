@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using CoachDraw.Model;
 
 namespace CoachDraw.Drawables.Items.Definitions
 {
