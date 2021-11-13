@@ -24,11 +24,13 @@ namespace CoachDraw
         public const int CurrentPlyxVersion = 2;
 
         // Returns the file version and advances the stream to the data portion.
-        public static uint ValidatePlyxHeader(Stream file)
+        private static bool ValidatePlyxHeader(Stream file, out uint version)
         {
+            version = 0;
+
             // Smallest possible PLYX is 17 bytes
             if (file == null || file.Length < 17)
-                return 0;
+                return false;
             file.Position = 0;
             var buf = new byte[4];
             if (file.Read(buf, 0, 4) != 4)
@@ -36,21 +38,22 @@ namespace CoachDraw
 
             // Check for "PLYX"
             if (buf[0] != 80 && buf[1] != 76 && buf[2] != 89 && buf[3] != 88)
-                return 0;
+                return false;
 
             if (file.Read(buf, 0, 4) != 4)
                 throw new IOException("Failed to read version values from plyx file.");
 
-            return BitConverter.ToUInt32(buf, 0);
+            version = BitConverter.ToUInt32(buf, 0);
+            return version is >= 1 and <= CurrentPlyxVersion;
         }
 
         public static Play LoadPlyxFile(string filePath)
         {
             var result = new Play();
             using var bw = new BinaryReader(File.OpenRead(filePath), Encoding.UTF8);
-            result.Version = ValidatePlyxHeader(bw.BaseStream);
-            if (result.Version < 1 || result.Version > CurrentPlyxVersion)
+            if (!ValidatePlyxHeader(bw.BaseStream, out var version))
                 return null;
+            result.Version = version;
             result.Name = bw.ReadString();
             result.Description = bw.ReadString();
             if (result.Version != 1) // Default was IIHF in version 1
@@ -84,7 +87,7 @@ namespace CoachDraw
                     }
                     line.Smoothed = bw.ReadBoolean();
                 }
-                var item = ItemBuilder.Build(type, playerNumber);
+                var item = ItemBuilder.Build(type, playerNumber != -1 ? playerNumber : null);
                 var newObj = new Drawable(location, item)
                 {
                     Line = line,
@@ -136,9 +139,9 @@ namespace CoachDraw
             if (!File.Exists(filePath))
                 return "";
             using var br = new BinaryReader(File.OpenRead(filePath), Encoding.UTF8);
-            return ValidatePlyxHeader(br.BaseStream) != 1
-                ? "**Invalid play file**"
-                : br.ReadString();
+            return ValidatePlyxHeader(br.BaseStream, out _)
+                ? br.ReadString()
+                : "**Invalid play file**";
         }
 
         public static bool RenamePlyx(string filePath, string newName)
@@ -147,7 +150,7 @@ namespace CoachDraw
                 return false;
             using var fs = new FileStream(filePath, FileMode.Open, FileAccess.ReadWrite);
             var br = new BinaryReader(fs, Encoding.UTF8);
-            if (ValidatePlyxHeader(br.BaseStream) != 1)
+            if (!ValidatePlyxHeader(br.BaseStream, out _))
                 return false;
             br.ReadString();
             var actualLen = (int)(br.BaseStream.Length - br.BaseStream.Position);
