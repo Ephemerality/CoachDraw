@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using CoachDraw.Extensions;
 
 namespace CoachDraw.Model
 {
@@ -55,8 +56,8 @@ namespace CoachDraw.Model
 
         public bool Draw(Graphics g, bool selected, Rectangle skipBox)
         {
-            var myPen = selected ? new Pen(Color.FromArgb(255 - Color.R, 255 - Color.G, 255 - Color.B), LineWidth) : new Pen(Color, LineWidth);
-            var cappedPen = (Pen)myPen.Clone();
+            using var myPen = selected ? new Pen(Color.Invert(), LineWidth) : new Pen(Color, LineWidth);
+            using var cappedPen = new Pen(myPen.Color, myPen.Width);
             if (!Smoothed && LineType != LineType.Lateral && Points.Count >= 20)
             {
                 //points = Smoothing.DouglasPeuckerReduction(points, 20.0);
@@ -64,7 +65,8 @@ namespace CoachDraw.Model
                 Points = Smoothing.BasicReduction(Points, 5);
                 Smoothed = true;
             }
-            if (GetAggregateLength(0, Points.Count - 1) < 5) return false; // Line doesn't actually seem to go anywhere. return false so that sucker can be removed!
+            if (GetAggregateLength(0, Points.Count - 1) < 5)
+                return false; // Line doesn't actually seem to go anywhere. return false so that sucker can be removed!
             SetHitBox();
 
             var endPath = new GraphicsPath();
@@ -98,7 +100,7 @@ namespace CoachDraw.Model
                 case LineType.Shot:
                     var origin = Points[^1];
                     var first = Points[0];
-                    var r = 8;
+                    const int r = 8;
                     var a2 = Math.Atan2(first.Y - origin.Y, first.X - origin.X);
                     using (var newPen = new Pen(Color, LineWidth))
                     {
@@ -106,10 +108,20 @@ namespace CoachDraw.Model
                         move.Translate(4, 8);
                         endPath.Transform(move);
                         newPen.CustomEndCap = new CustomLineCap(null, endPath);
-                        g.DrawLine(myPen, (int)(r * Math.Cos(a2 + Math.PI / 2)) + first.X, (int)(r * Math.Sin(a2 + Math.PI / 2)) + first.Y,
-                            (int)(8 / Math.Sin(Math.PI / 6) * Math.Cos(a2 + Math.PI / 6)) + origin.X, (int)(8 / Math.Sin(Math.PI / 6) * Math.Sin(a2 + Math.PI / 6)) + origin.Y);
-                        g.DrawLine(newPen, (int)(r * Math.Cos(a2 - Math.PI / 2)) + first.X, (int)(r * Math.Sin(a2 - Math.PI / 2)) + first.Y,
-                            (int)(8 / Math.Sin(Math.PI / 6) * Math.Cos(a2 - Math.PI / 6)) + origin.X, (int)(8 / Math.Sin(Math.PI / 6) * Math.Sin(a2 - Math.PI / 6)) + origin.Y);
+                        g.DrawLine(
+                            myPen,
+                            (int)(r * Math.Cos(a2 + Math.PI / 2)) + first.X,
+                            (int)(r * Math.Sin(a2 + Math.PI / 2)) + first.Y,
+                            (int)(8 / Math.Sin(Math.PI / 6) * Math.Cos(a2 + Math.PI / 6)) + origin.X,
+                            (int)(8 / Math.Sin(Math.PI / 6) * Math.Sin(a2 + Math.PI / 6)) + origin.Y
+                        );
+                        g.DrawLine(
+                            newPen,
+                            (int)(r * Math.Cos(a2 - Math.PI / 2)) + first.X,
+                            (int)(r * Math.Sin(a2 - Math.PI / 2)) + first.Y,
+                            (int)(8 / Math.Sin(Math.PI / 6) * Math.Cos(a2 - Math.PI / 6)) + origin.X,
+                            (int)(8 / Math.Sin(Math.PI / 6) * Math.Sin(a2 - Math.PI / 6)) + origin.Y
+                        );
                     }
                     break;
                 case LineType.Pass:
@@ -225,7 +237,7 @@ namespace CoachDraw.Model
                                 break;
                             }
                             cpoints.Add(point);
-                            if (point.Y > -4 && point.Y < 4)
+                            if (point.Y is > -4 and < 4)
                             {
                                 if (cpoints.Count > 1) g.DrawLines(myPen, cpoints.ToArray());
                                 cpoints.Clear();
@@ -273,7 +285,7 @@ namespace CoachDraw.Model
                                     Y = -1 * (float)(Math.Sin(10 * Math.PI * (bottom ? j + 20 : j) / 200) * 10)
                                 };
                                 cpoints.Add(newPoint);
-                                if (newPoint.Y > -4 && newPoint.Y < 4)
+                                if (newPoint.Y is > -4 and < 4)
                                 {
                                     if (cpoints.Count > 1) g.DrawLines(myPen, cpoints.ToArray());
                                     cpoints.Clear();
@@ -290,7 +302,6 @@ namespace CoachDraw.Model
                     Debugger.Break();
                     break;
             }
-            myPen.Dispose();
             return true;
         }
     }
