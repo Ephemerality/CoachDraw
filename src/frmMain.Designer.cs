@@ -302,7 +302,7 @@
             this.managePlaysToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.M)));
             this.managePlaysToolStripMenuItem.Size = new System.Drawing.Size(235, 22);
             this.managePlaysToolStripMenuItem.Text = "Open/Manage Plays...";
-            this.managePlaysToolStripMenuItem.Click += new System.EventHandler(this.openHVPlayToolStripMenuItem_Click);
+            this.managePlaysToolStripMenuItem.Click += new System.EventHandler(this.openManagedPlayToolStripMenuItem_Click);
             // 
             // saveToolStripMenuItem
             // 

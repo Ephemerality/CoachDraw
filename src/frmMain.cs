@@ -578,7 +578,7 @@ namespace CoachDraw
             var dlg = new OpenFileDialog
             {
                 Filter = "All supported files (*.ply, *.plyx)|*.ply;*.plyx|New play files (*.plyx)|*.plyx|HockeyVision play files (*.ply)|*.ply|All files (*.*)|*.*",
-                FilterIndex = 2
+                FilterIndex = 3
             };
             if (dlg.ShowDialog() == DialogResult.OK)
                 OpenFile(dlg.FileName, true);
@@ -616,7 +616,7 @@ namespace CoachDraw
         }
         #endregion
 
-        private void openHVPlayToolStripMenuItem_Click(object sender, EventArgs e)
+        private void openManagedPlayToolStripMenuItem_Click(object sender, EventArgs e)
         {
             using var ld = new FrmManage();
             if (ld.ShowDialog() == DialogResult.Yes && ld.OpenPlay != "")
