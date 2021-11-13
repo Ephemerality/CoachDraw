@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -11,6 +10,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
+using CoachDraw.Drawables;
+using CoachDraw.Drawables.Items;
 using CoachDraw.Model;
 using CoachDraw.Rink;
 
@@ -41,7 +42,7 @@ namespace CoachDraw
         private string _selectedTool = "Line";
         private string _currentFile = "";
         private bool _saved = true;
-        private DrawObj _selected;
+        private Drawable _selected;
         private string _lastSelectedMultiPrint = "";
         private List<string> _lastSetMultiPrint = new() { "", "", "", "" };
 
@@ -123,7 +124,7 @@ namespace CoachDraw
                 for (var i = 0; i < _currentPlay.Objects.Count; i++)
                 {
                     if (_currentPlay.Objects[i].HitBox != null && _currentPlay.Objects[i].HitBox.IsVisible(e.X, e.Y) ||
-                        _currentPlay.Objects[i].ObjLine != null && _currentPlay.Objects[i].ObjLine.HitBox != null && _currentPlay.Objects[i].ObjLine.HitBox.IsVisible(e.X, e.Y))
+                        _currentPlay.Objects[i].Line != null && _currentPlay.Objects[i].Line.HitBox != null && _currentPlay.Objects[i].Line.HitBox.IsVisible(e.X, e.Y))
                     {
                         hits.Add(i);
                     }
@@ -132,9 +133,9 @@ namespace CoachDraw
                 mn.Closed += DeselectObj;
                 if (hits.Count == 1)
                 {
-                    mn.Items.AddRange(BuildMenu((int)_currentPlay.Objects[hits[0]].ObjType,
-                        _currentPlay.Objects[hits[0]].ObjLine == null ? -1 : (int)_currentPlay.Objects[hits[0]].ObjLine.LineType,
-                        _currentPlay.Objects[hits[0]].ObjLine == null ? -1 : (int)_currentPlay.Objects[hits[0]].ObjLine.EndType));
+                    mn.Items.AddRange(BuildMenu((int)_currentPlay.Objects[hits[0]].Item.Type,
+                        _currentPlay.Objects[hits[0]].Line == null ? -1 : (int)_currentPlay.Objects[hits[0]].Line.LineType,
+                        _currentPlay.Objects[hits[0]].Line == null ? -1 : (int)_currentPlay.Objects[hits[0]].Line.EndType));
                     mn.Tag = hits[0];
                     _selected = _currentPlay.Objects[hits[0]];
                     Redraw();
@@ -145,9 +146,9 @@ namespace CoachDraw
                     foreach (var hit in hits)
                     {
                         var newMn = new ToolStripMenuItem(hit.ToString());
-                        newMn.DropDownItems.AddRange(BuildMenu((int)_currentPlay.Objects[hit].ObjType,
-                            _currentPlay.Objects[hit].ObjLine == null ? -1 : (int)_currentPlay.Objects[hit].ObjLine.LineType,
-                            _currentPlay.Objects[hit].ObjLine == null ? -1 : (int)_currentPlay.Objects[hit].ObjLine.EndType));
+                        newMn.DropDownItems.AddRange(BuildMenu((int)_currentPlay.Objects[hit].Item.Type,
+                            _currentPlay.Objects[hit].Line == null ? -1 : (int)_currentPlay.Objects[hit].Line.LineType,
+                            _currentPlay.Objects[hit].Line == null ? -1 : (int)_currentPlay.Objects[hit].Line.EndType));
                         newMn.Tag = hit;
                         newMn.MouseHover += SelectObj;
                         hitsMenu.Add(newMn);
@@ -162,44 +163,52 @@ namespace CoachDraw
             {
                 if (!_mouseDown) return;
                 _mouseDown = false;
-                if (_currentPlay.Objects.Any(o => o.ObjLoc.Equals(_startPoint)))
+                if (_currentPlay.Objects.Any(o => o.Location.Equals(_startPoint)))
                     return;
                 _endPoint.X = Math.Min(e.X, panel1.Width);
                 _endPoint.Y = Math.Min(e.Y, panel1.Height);
-                var newObj = new DrawObj
-                {
-                    ObjType = (ItemType)Enum.Parse(typeof(ItemType), ItemTypeBox.Text.Replace(" ", "").Replace(".", "")),
-                    ObjLoc = _startPoint,
-                    Color = colorDialog1.Color,
-                    ObjLabel = PlayerNumBox.Text == "None" ? -1 : int.Parse(PlayerNumBox.Text)
-                };
+
+                var itemType = (Item.TypeEnum)Enum.Parse(typeof(Item.TypeEnum), ItemTypeBox.Text.Replace(" ", "").Replace(".", ""));
+                var playerNumber = PlayerNumBox.Text == @"None"
+                    ? (int?) null
+                    : int.Parse(PlayerNumBox.Text);
+                var drawableItem = ItemBuilder.Build(itemType, playerNumber);
+                Line line = null;
                 if (!_startPoint.Equals(_endPoint) || _tempcoords.Count > 0)
                 {
-                    newObj.ObjLine = new Line
+                    line = new Line
                     {
                         LineType = (LineType)Enum.Parse(typeof(LineType), LineTypeBox.Text.Replace(" ", "")),
                         EndType = (EndType)Enum.Parse(typeof(EndType), EndTypeBox.Text.Replace(" ", "")),
                         Color = colorDialog1.Color
                     };
                     foreach (var item in widthBox.DropDownItems.OfType<ToolStripMenuItem>().Where(item => item.Checked))
-                        newObj.ObjLine.LineWidth = byte.Parse(item.Text.Remove(1));
+                        line.LineWidth = byte.Parse(item.Text.Remove(1));
 
                     var lineLength = 0;
                     if (_selectedTool == "Line")
                     {
                         lineLength = Smoothing.GetLineLength(_startPoint, _endPoint);
-                        newObj.ObjLine.Points.Add(_startPoint);
-                        newObj.ObjLine.Points.Add(_endPoint);
+                        line.Points.Add(_startPoint);
+                        line.Points.Add(_endPoint);
                     }
                     else if (_selectedTool == "Pencil")
                     {
-                        newObj.ObjLine.Points = _tempcoords.ToList();
-                        lineLength = newObj.ObjLine.GetAggregateLength(0, newObj.ObjLine.Points.Count - 1);
+                        line.Points = _tempcoords.ToList();
+                        lineLength = line.GetAggregateLength(0, line.Points.Count - 1);
                     }
-                    newObj.ObjLine.CleanDuplicates();
-                    if (lineLength < 20 || newObj.ObjLine.Points.Count < 2) newObj.ObjLine = null;
+                    line.CleanDuplicates();
+                    if (lineLength < 20 || line.Points.Count < 2)
+                        line = null;
                 }
-                _currentPlay.Objects.Add(newObj);
+
+                var drawable = new Drawable(_startPoint, drawableItem)
+                {
+                    Color = colorDialog1.Color,
+                    Line = line
+                };
+
+                _currentPlay.Objects.Add(drawable);
                 _saved = false;
                 UpdateTitlebar();
             }
@@ -255,19 +264,20 @@ namespace CoachDraw
             switch ((int)mn.OwnerItem.Tag)
             {
                 case 0:
-                    _currentPlay.Objects[i].ObjType = (ItemType)Enum.Parse(typeof(ItemType), mn.Text);
+                    var itemType = (Item.TypeEnum)Enum.Parse(typeof(Item.TypeEnum), mn.Text);
+                    _currentPlay.Objects[i].Item = ItemBuilder.Build(itemType, _currentPlay.Objects[i].Item.Number);
                     break;
                 case 1:
                     if (mn.Text == "Delete Line")
                     {
                         if (MessageBox.Show("Deleting this line cannot be undone. Are you sure you want to continue?", "Delete Line", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
-                            _currentPlay.Objects[i].ObjLine = null;
+                            _currentPlay.Objects[i].Line = null;
                     }
                     else
-                        _currentPlay.Objects[i].ObjLine.LineType = (LineType)Enum.Parse(typeof(LineType), mn.Text);
+                        _currentPlay.Objects[i].Line.LineType = (LineType)Enum.Parse(typeof(LineType), mn.Text);
                     break;
                 case 2:
-                    _currentPlay.Objects[i].ObjLine.EndType = (EndType)Enum.Parse(typeof(EndType), mn.Text);
+                    _currentPlay.Objects[i].Line.EndType = (EndType)Enum.Parse(typeof(EndType), mn.Text);
                     break;
             }
             _saved = false;
@@ -292,10 +302,10 @@ namespace CoachDraw
             var itemList = new List<ToolStripItem>();
             var lineList = new List<ToolStripItem>();
             var endList = new List<ToolStripItem>();
-            foreach (var itemtype in Enum.GetNames(typeof(ItemType)))
+            foreach (var itemtype in Enum.GetNames(typeof(Item.TypeEnum)))
             {
                 var m = new ToolStripMenuItem(itemtype, null, ClickItemList);
-                if (it != -1 && Enum.GetName(typeof(ItemType), it).Equals(itemtype)) { m.Checked = true; }
+                if (it != -1 && Enum.GetName(typeof(Item.TypeEnum), it).Equals(itemtype)) { m.Checked = true; }
                 itemList.Add(m);
             }
             lineList.Add(new ToolStripMenuItem("Delete Line", null, ClickItemList));

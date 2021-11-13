@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Text;
+using CoachDraw.Drawables;
+using CoachDraw.Drawables.Items;
 using CoachDraw.Model;
 using CoachDraw.Rink;
 
@@ -13,7 +15,7 @@ namespace CoachDraw
         public string Name { get; set; }
         public string Description { get; set; }
         public uint Version { get; set; } = Plays.CurrentPlyxVersion;
-        public List<DrawObj> Objects { get; set; } = new();
+        public List<Drawable> Objects { get; set; } = new();
         public RinkType RinkType { get; set; } = RinkType.IIHF;
     }
 
@@ -56,20 +58,14 @@ namespace CoachDraw
             var numObjs = bw.ReadInt32();
             for (var i = 0; i < numObjs; i++)
             {
-                var newObj = new DrawObj
-                {
-                    ObjType = (ItemType) bw.ReadByte(),
-                    Color = ColorTranslator.FromWin32(bw.ReadInt32()),
-                    ObjLabel = bw.ReadInt32(),
-                    ObjLoc =
-                    {
-                        X = bw.ReadInt32(),
-                        Y = bw.ReadInt32()
-                    }
-                };
+                var type = (Item.TypeEnum)bw.ReadByte();
+                var color = ColorTranslator.FromWin32(bw.ReadInt32());
+                var playerNumber = bw.ReadInt32();
+                var location = new Point(bw.ReadInt32(), bw.ReadInt32());
+                Line line = null;
                 if (bw.ReadBoolean())
                 {
-                    newObj.ObjLine = new Line
+                    line = new Line
                     {
                         Color = ColorTranslator.FromWin32(bw.ReadInt32()),
                         LineType = (LineType) bw.ReadByte(),
@@ -84,10 +80,16 @@ namespace CoachDraw
                             X = bw.ReadInt32(),
                             Y = bw.ReadInt32()
                         };
-                        newObj.ObjLine.Points.Add(newPoint);
+                        line.Points.Add(newPoint);
                     }
-                    newObj.ObjLine.Smoothed = bw.ReadBoolean();
+                    line.Smoothed = bw.ReadBoolean();
                 }
+                var item = ItemBuilder.Build(type, playerNumber);
+                var newObj = new Drawable(location, item)
+                {
+                    Line = line,
+                    Color = color
+                };
                 result.Objects.Add(newObj);
             }
             return result;
@@ -104,25 +106,25 @@ namespace CoachDraw
             bw.Write(currentPlay.Objects.Count);
             foreach (var obj in currentPlay.Objects)
             {
-                bw.Write((byte)obj.ObjType);
+                bw.Write((byte)obj.Item.Type);
                 bw.Write(ColorTranslator.ToWin32(obj.Color));
-                bw.Write(obj.ObjLabel);
-                bw.Write(obj.ObjLoc.X);
-                bw.Write(obj.ObjLoc.Y);
-                bw.Write(obj.ObjLine != null);
-                if (obj.ObjLine != null)
+                bw.Write(obj.Item.Number ?? -1);
+                bw.Write(obj.Location.X);
+                bw.Write(obj.Location.Y);
+                bw.Write(obj.Line != null);
+                if (obj.Line != null)
                 {
-                    bw.Write(ColorTranslator.ToWin32(obj.ObjLine.Color));
-                    bw.Write((byte)obj.ObjLine.LineType);
-                    bw.Write((byte)obj.ObjLine.EndType);
-                    bw.Write(obj.ObjLine.LineWidth);
-                    bw.Write(obj.ObjLine.Points.Count);
-                    foreach (var point in obj.ObjLine.Points)
+                    bw.Write(ColorTranslator.ToWin32(obj.Line.Color));
+                    bw.Write((byte)obj.Line.LineType);
+                    bw.Write((byte)obj.Line.EndType);
+                    bw.Write(obj.Line.LineWidth);
+                    bw.Write(obj.Line.Points.Count);
+                    foreach (var point in obj.Line.Points)
                     {
                         bw.Write(point.X);
                         bw.Write(point.Y);
                     }
-                    bw.Write(obj.ObjLine.Smoothed);
+                    bw.Write(obj.Line.Smoothed);
                 }
             }
             bw.Write(new [] { 'E', 'N', 'D' });
@@ -180,7 +182,7 @@ namespace CoachDraw
                 file.ReadLine(); // H00 or H01
                 result.Name = file.ReadLine();
                 var items = int.Parse(file.ReadLine()); //# of items
-                var prevType = 3;
+                Line line = null;
                 for (var i = 1; i <= items; i++)
                 {
                     var type = int.Parse(file.ReadLine());
@@ -195,62 +197,65 @@ namespace CoachDraw
                              */
                         if (words[3] == "1")
                         {
-                            prevType = 3;
                             file.ReadLine();
                             continue;
                         }
 
-                        var newObj = new DrawObj
+                        line = new Line
                         {
-                            ObjLine = new Line
-                            {
-                                LineWidth = byte.Parse(words[1]),
-                                LineType = (LineType) byte.Parse(words[2])
-                            }
+                            LineWidth = byte.Parse(words[1]),
+                            LineType = (LineType)byte.Parse(words[2])
                         };
-                        if (int.Parse(words[4]) > 4) words[4] = "0";
+                        if (int.Parse(words[4]) > 4)
+                            words[4] = "0";
                         if (words[4] == "-1") // end type can't be -1, broken object
                         {
                             file.ReadLine();
                             continue;
                         }
-                        newObj.ObjLine.EndType = (EndType)byte.Parse(words[4]);
-                        newObj.ObjLine.Color = ColorTranslator.FromWin32(int.Parse(words[0]));
+                        line.EndType = (EndType)byte.Parse(words[4]);
+                        line.Color = ColorTranslator.FromWin32(int.Parse(words[0]));
                         words = file.ReadLine().Split(' ');
                         // Read line and check points for bad lines (some plays seem to have artifact objects in them)
                         var valid = false;
                         for (var j = 0; j < words.Length - 1; j += 2)
                         {
                             if (!valid && words[j] != "0" && words[j + 1] != "0") valid = true;
-                            newObj.ObjLine.Points.Add(new Point(int.Parse(words[j]), int.Parse(words[j + 1])));
+                            line.Points.Add(new Point(int.Parse(words[j]), int.Parse(words[j + 1])));
                         }
                         // Remove bad lines
-                        if (!valid || newObj.ObjLine.Points.Count == 2 && Smoothing.GetLineLength(newObj.ObjLine.Points[0], newObj.ObjLine.Points[1]) < 20)
-                            newObj.ObjLine = null;
-                        result.Objects.Add(newObj);
+                        if (!valid || line.Points.Count == 2 && Smoothing.GetLineLength(line.Points[0], line.Points[1]) < 20)
+                            line = null;
                     }
                     else if (type == 3)
                     {
                         /* 16711680 -1 1 9 855 290
                              * color, label (-1 for none), number of points (always 1), type, X, Y
                              */
-                        var newObj = prevType == 3 ? new DrawObj() : result.Objects[^1];
-                        newObj.ObjType = (ItemType)byte.Parse(words[3]);
-                        newObj.ObjLoc = new Point(int.Parse(words[4]), int.Parse(words[5]));
-                        newObj.Color = ColorTranslator.FromWin32(int.Parse(words[0]));
+                        var itemType = (Item.TypeEnum)byte.Parse(words[3]);
+                        var location = new Point(int.Parse(words[4]), int.Parse(words[5]));
+                        var color = ColorTranslator.FromWin32(int.Parse(words[0]));
+                        int? playerNumber = null;
                         if (!words[1].Equals("-1"))
-                            newObj.ObjLabel = int.Parse(words[1]);
-                        else if (newObj.ObjType == ItemType.PlayerNumber)
-                            newObj.ObjLabel = 0;
-                        if (prevType == 3)
-                            result.Objects.Add(newObj);
-                    }
-                    prevType = type;
+                            playerNumber = int.Parse(words[1]);
+                        // -1 is an invalid player number, we'll just make the type none
+                        else if (itemType == Item.TypeEnum.PlayerNumber)
+                            itemType = Item.TypeEnum.None;
 
+                        var newObj = new Drawable(location, ItemBuilder.Build(itemType, playerNumber))
+                        {
+                            Color = color,
+                            Line = line
+                        };
+
+                        line = null;
+
+                        result.Objects.Add(newObj);
+                    }
                 }
 
                 // Search and destroy broken, pointless objects (no line, no type, no label, wouldn't really display anything)
-                result.Objects.RemoveAll(o => o.ObjLine == null && o.ObjType == ItemType.None && o.ObjLabel == -1);
+                result.Objects.RemoveAll(o => o.Line == null && o.Item.Type == Item.TypeEnum.None && o.Item.Number is -1 or null);
 
                 file.ReadLine(); // Blank line
                 var skipLines = int.Parse(file.ReadLine()); // Skip "attach" list as it is already guaranteed that legit lines will always have an object attached
